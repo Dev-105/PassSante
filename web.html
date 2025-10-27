@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PassSanté | Secure Health Blockchain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <style>
+        /* UPDATED COLOR PALETTE FOR LIGHTER DESIGN */
+        :root {
+            --dark-purple: #F0F4FF; /* Very light background color, almost white with a hint of purple */
+            --purple: #C768FF;      /* Primary accent color (stayed the same) */
+            --light-purple: #D9E3FF; /* Light accent color, slightly darker than dark-purple */
+            --white: #18016B;       /* Main text color (switched from white to the original dark purple for contrast) */
+            --bg-card-light: #FFFFFF; /* New background for cards on light mode */
+            --text-dark: #18016B;   /* Explicit dark text for readability on light backgrounds */
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-purple); /* Uses the new very light background */
+            color: var(--white); /* Uses the new dark text color */
+            overflow-x: hidden;
+        }
+        
+        /* Updated utility classes to use the new color variables for contrast */
+        .text-primary {
+            color: var(--purple) !important;
+        }
+        
+        .bg-primary {
+            background-color: var(--purple) !important;
+        }
+        
+        .bg-dark {
+            background-color: var(--dark-purple) !important; /* New light background */
+        }
+        
+        .bg-light {
+            background-color: var(--light-purple) !important;
+        }
+        
+        .border-primary {
+            border-color: var(--purple) !important;
+        }
+        
+        .text-dark {
+            color: var(--text-dark) !important; /* Explicitly dark text */
+        }
+        
+        .text-light {
+            color: rgba(24, 1, 107, 0.7) !important; /* Slightly lighter dark text for secondary content */
+        }
+        
+        .gradient-bg {
+            /* Adjusted gradient for a light, clean look */
+            background: linear-gradient(135deg, var(--dark-purple) 0%, var(--light-purple) 50%, var(--dark-purple) 100%) !important;
+        }
+        
+        .cyber-grid {
+            /* Grid on light background */
+            background-image: 
+                linear-gradient(rgba(24, 1, 107, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(24, 1, 107, 0.05) 1px, transparent 1px) !important;
+            background-size: 50px 50px !important;
+        }
+        
+        .neon-glow {
+            /* Adjusted for a subtle glow on light background */
+            box-shadow: 
+                0 0 5px rgba(199, 104, 255, 0.6),
+                0 0 10px rgba(199, 104, 255, 0.4),
+                0 0 15px rgba(199, 104, 255, 0.2) !important;
+        }
+        
+        .cyber-border {
+            position: relative;
+            border: 1px solid transparent;
+            /* White background with a purple-to-light-purple border */
+            background: linear-gradient(var(--dark-purple), var(--dark-purple)) padding-box,
+                        linear-gradient(135deg, var(--purple), var(--light-purple)) border-box !important;
+        }
+        
+        /* NEW: Cyber Card for the light background */
+        .cyber-card-light {
+            background: var(--bg-card-light) !important;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(199, 104, 255, 0.2) !important;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow for lift */
+        }
+
+        .cyber-card-light::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--purple), transparent) !important;
+        }
+        
+        /* Existing custom styles (updated for new color variables) */
+        .pulse-ring {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.7; }
+        }
+        
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .blockchain-node {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--purple) !important;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .blockchain-node::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--purple) !important;
+            top: -4px;
+            left: -4px;
+            animation: pulse 2s infinite;
+        }
+
+        .health-passport {
+            /* Adjusted for light mode - similar to cyber-card-light but for the hero image */
+            background: linear-gradient(135deg, rgba(199, 104, 255, 0.05), rgba(245, 230, 255, 0.5)) !important;
+            border: 1px solid rgba(199, 104, 255, 0.3) !important;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .health-passport::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(199, 104, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(245, 230, 255, 0.1) 0%, transparent 50%) !important;
+            z-index: -1;
+        }
+
+        .security-shield .center {
+            color: var(--purple) !important;
+        }
+
+        .hedera-badge {
+            background: linear-gradient(135deg, rgba(199, 104, 255, 0.2), rgba(245, 230, 255, 0.5)) !important;
+            border: 1px solid rgba(199, 104, 255, 0.3) !important;
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--text-dark) !important; /* Dark text for readability */
+        }
+        
+        .data-stream {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+        
+        .data-bit {
+            position: absolute;
+            width: 4px;
+            height: 20px;
+            background: var(--purple) !important;
+            opacity: 0.7;
+            animation: dataFlow 5s linear infinite;
+        }
+
+        .nav-glow {
+            color: var(--text-dark) !important; /* Dark text for light background nav */
+            position: relative;
+        }
+        
+        .nav-glow::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--purple) !important;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-glow:hover::after {
+            transform: scaleX(1);
+        }
+        
+        .cyber-button {
+            /* White text still works well on the primary purple gradient */
+            background: linear-gradient(135deg, var(--purple), #A64DFF) !important;
+            border: none;
+            border-radius: 8px;
+            color: white !important;
+            font-weight: 600;
+            padding: 12px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(199, 104, 255, 0.4) !important;
+        }
+        
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--purple), transparent) !important;
+            animation: scan 3s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        /* Floating shapes visibility adjusted for light mode */
+        .shape {
+            opacity: 0.05; /* Much lower opacity on light background */
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--purple), var(--light-purple)) !important;
+        }
+        
+        .readable-text {
+            color: var(--text-dark) !important;
+            line-height: 1.6;
+        }
+        
+        .readable-text-dark {
+            color: var(--text-dark) !important; /* All text on light background is dark */
+            line-height: 1.6;
+        }
+        
+        .section-title {
+            color: var(--text-dark) !important;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        
+        .card-title {
+            color: var(--text-dark) !important;
+            font-weight: 700;
+        }
+        
+        .card-text {
+            color: rgba(24, 1, 107, 0.7) !important; /* Secondary dark text */
+        }
+        
+        /* Timeline styling is kept, but colors are adjusted for light background */
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+        
+        .timeline-item::before {
+            background: var(--purple) !important;
+        }
+        
+        .timeline-item::after {
+            background: rgba(24, 1, 107, 0.2); /* Dark, light opacity line */
+        }
+
+        /* New styles for the feature selection */
+        .feature-tab {
+            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+            border: 1px solid var(--light-purple);
+        }
+        
+        .feature-tab.active {
+            background-color: var(--purple);
+            color: white;
+            box-shadow: 0 4px 10px rgba(199, 104, 255, 0.4);
+            border-color: var(--purple);
+        }
+    </style>
+</head>
+<body class="gradient-bg cyber-grid">
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    
+    <nav class="bg-dark py-6 px-8 sticky top-0 z-50 cyber-border" style="backdrop-filter: blur(10px);">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 flex items-center justify-center">
+                    <svg width="40" height="40" viewBox="0 0 141.62 137.5" class="logo-animation">
+                        <path fill="#C768FF" d="M92.18,20.08v25.23l-25.96.31c-9.3.11-16.79,7.69-16.79,16.99v29.56h-31.79c-5.39,0-10.52-2.61-13.49-7.1-6.75-10.19-4.64-20.82,1.72-27.18,3.64-3.64,8.66-5.88,14.2-5.88h16.48c8.53,0,15.45-6.92,15.45-15.45v-18.91c0-5.39,2.61-10.52,7.1-13.49,10.19-6.75,20.82-4.64,27.18,1.72,3.64,3.64,5.88,8.66,5.88,14.2Z"/>
+                        <path fill="#C768FF" d="M137.23,52.07c7.03,10.3,4.95,21.1-1.49,27.53-3.64,3.64-8.66,5.88-14.2,5.88h-16.82c-8.34,0-15.11,6.76-15.11,15.11v19.67c0,5.13-2.52,9.94-6.75,12.84-10.3,7.03-21.1,4.95-27.53-1.49-3.64-3.64-5.88-8.66-5.88-14.2v-25.23h42.74v-46.86h32.21c5.13,0,9.94,2.52,12.84,6.75Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-2xl font-black text-dark">Pass<span class="text-primary">Santé</span></span>
+                    <div class="hedera-badge text-xs">
+                        <i class="fas fa-link"></i>
+                        <span>POWERED BY HEDERA HASHGRAPH</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hidden lg:flex space-x-10">
+                <a href="#" class="nav-glow font-medium text-dark">DASHBOARD</a>
+                <a href="#problem-vision" class="nav-glow font-medium text-dark">PROBLÈME & VISION</a>
+                <a href="#features" class="nav-glow font-medium text-dark">FONCTIONNALITÉS</a>
+                <a href="#security" class="nav-glow font-medium text-dark">SECURITY</a>
+                <a href="#timeline" class="nav-glow font-medium text-dark">TIMELINE</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center cursor-pointer neon-glow">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    <div class="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                        <div class="w-2 h-2 bg-white rounded-full pulse-ring"></div>
+                    </div>
+                </div>
+                <button class="cyber-button flex items-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>NOUVEAU DOSSIER</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <section class="bg-dark py-24 px-8 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full opacity-10">
+            <div class="data-stream" id="dataStream"></div>
+        </div>
+        
+        <div class="container mx-auto max-w-6xl">
+            <div class="flex flex-col lg:flex-row items-center">
+                <div class="lg:w-1/2 mb-16 lg:mb-0">
+                    <div class="inline-block px-4 py-2 rounded-full bg-primary/20 text-primary text-sm font-bold mb-6 cyber-border">
+                        <span>DÉCENTRALISÉ • SÉCURISÉ • IMMUABLE</span>
+                    </div>
+                    <h1 class="text-5xl lg:text-7xl font-black mb-6 leading-tight section-title text-dark">
+                        VOTRE <span class="text-primary">IDENTITÉ</span> DE SANTÉ SUR LA BLOCKCHAIN
+                    </h1>
+                    <p class="text-xl readable-text-dark mb-8 max-w-lg">
+                        PassSanté utilise <span class="text-primary font-bold">Hedera Hashgraph</span> pour créer une identité de santé infalsifiable et décentralisée, vous redonnant le contrôle de vos données médicales avec une sécurité de niveau entreprise.
+                    </p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <button class="cyber-button flex items-center justify-center space-x-2 text-lg py-4">
+                            <i class="fas fa-rocket"></i>
+                            <span>ACTIVER PASSEPORT SANTÉ</span>
+                        </button>
+                        <button class="bg-transparent border border-primary text-primary hover:bg-primary/10 px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-lg">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>AUDIT SÉCURITÉ</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="lg:w-1/2 relative">
+                    <div class="health-passport p-8 max-w-md mx-auto">
+                        <div class="scan-line"></div>
+                        <div class="flex justify-between items-center mb-8">
+                            <h3 class="text-2xl font-black card-title text-dark">PASSEPORT SANTÉ</h3>
+                            <div class="flex space-x-2 items-center">
+                                <div class="blockchain-node"></div>
+                                <span class="text-primary font-bold text-sm">LIVE ON HEDERA</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <div class="flex justify-between mb-3">
+                                <span class="text-light">CHIFFREMENT DES DONNÉES</span>
+                                <span class="text-primary font-bold">AES-256</span>
+                            </div>
+                            <div class="h-2 bg-light rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-primary to-light-purple rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <div class="cyber-card-light p-4 text-center">
+                                <div class="text-primary text-2xl font-black mb-1">2</div>
+                                <div class="text-light text-sm">ALLERGIES</div>
+                            </div>
+                            <div class="cyber-card-light p-4 text-center">
+                                <div class="text-primary text-2xl font-black mb-1">5</div>
+                                <div class="text-light text-sm">MÉDICAMENTS</div>
+                            </div>
+                            <div class="cyber-card-light p-4 text-center">
+                                <div class="text-primary text-2xl font-black mb-1">3</div>
+                                <div class="text-light text-sm">CONDITIONS</div>
+                            </div>
+                            <div class="cyber-card-light p-4 text-center">
+                                <div class="text-primary text-2xl font-black mb-1">12</div>
+                                <div class="text-light text-sm">VACCINATIONS</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button class="text-primary flex items-center space-x-2">
+                                <div class="security-shield">
+                                    <div class="outer"></div>
+                                    <div class="inner"></div>
+                                    <div class="center">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                </div>
+                            </button>
+                            <button class="text-primary flex items-center space-x-2 font-bold">
+                                <i class="fas fa-link"></i>
+                                <span>VOIR SUR HEDERA</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute -top-6 -right-6 w-12 h-12 bg-primary rounded-full flex items-center justify-center neon-glow float">
+                        <i class="fas fa-lock text-white"></i>
+                    </div>
+                    <div class="absolute -bottom-6 -left-6 w-12 h-12 bg-light-purple rounded-full flex items-center justify-center neon-glow float" style="animation-delay: 2s;">
+                        <i class="fas fa-fingerprint text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="problem-vision" class="bg-light py-20 px-8">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black mb-6 section-title text-dark">PASSEPORT NUMÉRIQUE DE SANTÉ</h2>
+                <p class="text-xl readable-text-dark max-w-3xl mx-auto">Un écosystème sécurisé, décentralisé et interopérable pour l'avenir de votre santé.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="cyber-card-light p-8 animated-feature-card">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-exclamation-triangle text-primary text-3xl mr-4"></i>
+                        <h3 class="text-3xl font-black card-title text-dark">1. PROBLÉMATIQUE ACTUELLE</h3>
+                    </div>
+                    <ul class="space-y-4 list-disc list-inside readable-text-dark pl-4">
+                        <li><span class="font-bold text-dark">Données Silotées:</span> Dossiers médicaux enfermés dans un hôpital ou un pays.</li>
+                        <li><span class="font-bold text-dark">Risque en Cas d’Urgence:</span> Secouristes travaillant "à l'aveugle" (allergies, traitements ignorés).</li>
+                        <li><span class="font-bold text-dark">Fraudes et Falsifications:</span> Ordonnances et certificats médicaux contrefaits.</li>
+                        <li><span class="font-bold text-dark">Perte de Contrôle:</span> Patients non propriétaires de leurs informations, ne pouvant gérer les accès.</li>
+                        <li><span class="font-bold text-dark">Perte de Données:</span> Catastrophes ou pannes informatiques effaçant des informations vitales.</li>
+                    </ul>
+                </div>
+
+                <div class="cyber-card-light p-8 animated-feature-card">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-lightbulb text-primary text-3xl mr-4"></i>
+                        <h3 class="text-3xl font-black card-title text-dark">2. NOTRE VISION</h3>
+                    </div>
+                    <ul class="space-y-4 list-disc list-inside readable-text-dark pl-4">
+                        <li><span class="font-bold text-dark">Propriété et Contrôle:</span> Le patient est le seul maître de ses données.</li>
+                        <li><span class="font-bold text-dark">Accès Immédiat & Sécurisé:</span> Informations médicales disponibles instantanément, adaptées au rôle du professionnel.</li>
+                        <li><span class="font-bold text-dark">Portabilité Globale:</span> Dossiers accessibles à l'échelle nationale et internationale (urgences, déménagements).</li>
+                        <li><span class="font-bold text-dark">Scalabilité Future:</span> Intégration future de l'IA, des LLM, des wearables et des analyses prédictives.</li>
+                        <li><span class="font-bold text-dark">Résilience Totale:</span> Sécurité des données assurée par l'architecture aBFT de Hedera.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="bg-dark py-20 px-8">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black mb-6 section-title text-dark">3. FONCTIONNALITÉS CLÉS ET CAS RÉELS</h2>
+                <p class="text-xl readable-text-dark max-w-3xl mx-auto">Découvrez comment PassSanté transforme l'accès aux soins pour chaque acteur du système de santé.</p>
+            </div>
+
+            <div class="flex justify-center space-x-4 mb-12 flex-wrap">
+                <button class="feature-tab active" data-role="patient">
+                    <i class="fas fa-user mr-2"></i> Patient
+                </button>
+                <button class="feature-tab" data-role="urgence">
+                    <i class="fas fa-heartbeat mr-2"></i> Urgence (Break-Glass)
+                </button>
+                <button class="feature-tab" data-role="medecin">
+                    <i class="fas fa-user-md mr-2"></i> Médecin
+                </button>
+                <button class="feature-tab" data-role="pharmacien">
+                    <i class="fas fa-prescription-bottle-alt mr-2"></i> Pharmacien
+                </button>
+            </div>
+
+            <div id="feature-content" class="min-h-[400px]">
+                
+                <div class="feature-card animated-feature-card" data-role="patient">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="cyber-card-light p-8">
+                            <h4 class="text-2xl font-bold mb-3 text-primary">Cas Réel : Propriété et Contrôle</h4>
+                            <p class="readable-text-dark mb-4">
+                                <span class="font-bold">Marie, 34 ans, voyage à l’étranger.</span> Elle consulte un nouveau médecin. Grâce à son Passeport Santé, le médecin accède uniquement aux informations pertinentes (allergies connues, antécédents récents) sans voir son dossier complet, garantissant sa vie privée.
+                            </p>
+                            <h4 class="text-lg font-bold mb-2 text-dark">Rôle Hedera :</h4>
+                            <p class="text-light">
+                                Chaque *consentement* et *accès* est horodaté et *immuable* via le Hedera Consensus Service (HCS), avec un hash du document pour garantir *intégrité* et *traçabilité* totale.
+                            </p>
+                        </div>
+                        <div class="cyber-card-light p-8">
+                            <h4 class="text-2xl font-bold mb-4 text-primary">Fonctionnalités du Patient</h4>
+                            <ul class="space-y-3 readable-text-dark list-disc list-inside">
+                                <li>Tableau de bord complet pour *consulter ses données* et historiques.</li>
+                                <li>*QR code d’urgence* ou Wallet Pass pour accès limité en situation critique.</li>
+                                <li>Historique détaillé des accès et *gestion de consentement*.</li>
+                                <li>Notifications en temps réel sur l’utilisation de ses données.</li>
+                                <li>Préparation future pour *intégration biométrique sécurisée*.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card hidden animated-feature-card" data-role="urgence">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="cyber-card-light p-8">
+                            <h4 class="text-2xl font-bold mb-3 text-primary">Cas Réel : Accès d'Urgence "Break-Glass"</h4>
+                            <p class="readable-text-dark mb-4">
+                                <span class="font-bold">Ahmed, victime d’un accident, est inconscient.</span> Les secouristes scannent son QR code et obtiennent *uniquement les informations vitales* : groupe sanguin, allergies, maladies chroniques. Le système bloque l'accès aux dossiers non-critiques.
+                            </p>
+                            <h4 class="text-lg font-bold mb-2 text-dark">Rôle Hedera :</h4>
+                            <p class="text-light">
+                                Chaque accès est *immédiatement journalisé* sur le Hedera Ledger, déclenchant des alertes et des notifications automatiques au contact d'urgence du patient pour une *traçabilité infalsifiable*.
+                            </p>
+                        </div>
+                        <div class="cyber-card-light p-8">
+                            <h4 class="text-2xl font-bold mb-4 text-primary">Fonctionnalités Secouristes</h4>
+                            <ul class="space-y-3 readable-text-dark list-disc list-inside">
+                                <li>Scan QR code pour accès *"break-glass" aux données vitales*.</li>
+                                <li>*Ticket temporaire horodaté* pour l'audit et la traçabilité.</li>
+                                <li>Transmission sécurisée des informations critiques à l’hôpital de destination.</li>
+                                <li>Interface simplifiée avec *instructions d'urgence rapides*.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card hidden animated-feature-card" data-role="medecin">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="cyber-card-light p-8">
+                            <h4 class="text-2xl font-bold mb-3 text-primary">Cas Réel : Continuité des Soins & Portabilité</h4>
+                            <p class="readable-text-dark mb-4">
+                                <span class="font-bold">Sophie déménage du Maroc vers la France.</span> Son dossier complet, horodaté et sécurisé, est transféré au nouvel hôpital, accessible selon les rôles et besoins des médecins, *réduisant les tests redondants*.
+                            </p>
+                            <h4 class="text-lg font-bold mb-2 text-dark">Rôle Hedera :</h4>
+                            <p class="text-light">
+                                Les *hashes des documents* et les métadonnées de transfert sont enregistrés sur le DLT, assurant une *traçabilité sans faille* et l'*intégrité du dossier* malgré le changement de système.
+                            </p>
+                        </div>
+                        <div class="cyber-card-light p-8">
+                            <h4 class="text-2xl font-bold mb-4 text-primary">Fonctionnalités Médecins</h4>
+                            <ul class="space-y-3 readable-text-dark list-disc list-inside">
+                                <li>Accès basé sur un *rôle vérifié* via des identités numériques.</li>
+                                <li>Upload de documents médicaux *signés numériquement* et hashés sur Hedera.</li>
+                                <li>Création d’ordonnances numériques *uniques (NFT)* pour chaque patient.</li>
+                                <li>Filtrage rapide des dossiers pour urgences ou suivi régulier.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card hidden animated-feature-card" data-role="pharmacien">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="cyber-card-light p-8">
+                            <h4 class="text-2xl font-bold mb-3 text-primary">Cas Réel : Lutte Contre la Fraude</h4>
+                            <p class="readable-text-dark mb-4">
+                                <span class="font-bold">Une ordonnance est falsifiée.</span> Le pharmacien vérifie l'authenticité de l'*ordonnance NFT* sur Hedera en temps réel. Le système garantit qu'une ordonnance n'est consommée qu'une seule fois.
+                            </p>
+                            <h4 class="text-lg font-bold mb-2 text-dark">Rôle Hedera :</h4>
+                            <p class="text-light">
+                                L'utilisation de *signatures numériques* et de *hashes immuables* garantit l'authenticité et la non-répudiation des documents, rendant la falsification impossible.
+                            </p>
+                        </div>
+                        <div class="cyber-card-light p-8">
+                            <h4 class="text-2xl font-bold mb-4 text-primary">Fonctionnalités Pharmaciens</h4>
+                            <ul class="space-y-3 readable-text-dark list-disc list-inside">
+                                <li>Scan et *vérification des ordonnances NFT* pour l'authenticité.</li>
+                                <li>"Burn" (consommation)** automatique des ordonnances une fois délivrées.</li>
+                                <li>Journal de traçabilité Hedera pour chaque transaction et délivrance.</li>
+                                <li>Notifications pour prévenir toute tentative de fraude.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <section id="hedera-carousel" class="py-16 bg-light">
+        <div class="container mx-auto max-w-6xl">
+          <h2 class="text-4xl font-black text-dark mb-8 text-center">
+            Hedera Partenaires
+          </h2>
+      
+          <div class="flex justify-center">
+            <div id="carousel-wrapper" class="overflow-hidden relative w-full max-w-5xl">
+              <div
+                id="logo-track"
+                class="flex space-x-12 will-change-transform cursor-grab touch-none"
+                style="width: max-content;"
+              >
+                <!-- your logos -->
+                <div class="logo-item w-48 h-28 flex items-center justify-center p-4 bg-white rounded-2xl ">
+
+                  <img src="./logo/1_vE8bv4dhffwX7v7Pue6Awg.png" class="max-h-full max-w-full object-contain" />
+                </div>
+                <div class="logo-item w-48 h-28 flex items-center justify-center p-4 bg-white rounded-2xl ">
+
+                  <img src="./logo/cmc-logo.png" class="max-h-full max-w-full object-contain" />
+                </div>
+                <div class="logo-item w-48 h-28 flex items-center justify-center p-4 bg-white rounded-2xl ">
+
+                  <img src="./logo/hedera-logo-freelogovectors.net_.png" class="max-h-full max-w-full object-contain" />
+                </div>
+                <div class="logo-item w-48 h-28 flex items-center justify-center p-4 bg-white rounded-2xl ">
+
+                  <img src="./logo/Master_Logo_RGB.png" class="max-h-full max-w-full object-contain" />
+                </div>
+                <div class="logo-item w-48 h-28 flex items-center justify-center p-4 bg-white rounded-2xl ">
+
+                  <img src="./logo/M0CewdubLfPiNKepR4Zo43b5w.avif" class="max-h-full max-w-full object-contain" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <style>
+        .is-grabbing {
+          cursor: grabbing !important;
+        }
+        #logo-track,
+        #carousel-wrapper {
+          user-select: none;
+        }
+      </style>
+      
+      <script>
+        // === True Infinite Continuous Carousel ===
+        (function () {
+          const track = document.getElementById("logo-track");
+          const baseItems = Array.from(track.children);
+          const wrapper = document.getElementById("carousel-wrapper");
+      
+          // Clone logos multiple times to make a long, continuous track
+          const clonesNeeded = 4; // how many full sets to duplicate (tweak for smoothness)
+          for (let i = 0; i < clonesNeeded; i++) {
+            baseItems.forEach((item) => {
+              track.appendChild(item.cloneNode(true));
+            });
+          }
+      
+          let speed = 80; // px per second
+          let pos = 0;
+          let lastTime = null;
+          let isDragging = false;
+          let dragStartX = 0;
+          let dragStartPos = 0;
+      
+          // compute total width of one original set
+          function getSetWidth() {
+            const first = baseItems[0].getBoundingClientRect();
+            const second = baseItems[1].getBoundingClientRect();
+            const step = second.left - first.left;
+            return step * baseItems.length;
+          }
+          let setWidth = 0;
+          function computeSetWidth() {
+            setWidth = getSetWidth();
+          }
+          window.addEventListener("resize", computeSetWidth);
+          computeSetWidth();
+      
+          // Animation loop (never resets)
+          function animate(t) {
+            if (!lastTime) lastTime = t;
+            const dt = (t - lastTime) / 1000;
+            lastTime = t;
+      
+            if (!isDragging) pos += speed * dt;
+      
+            // Always translate using modulo so it wraps seamlessly
+            const offset = pos % setWidth;
+            track.style.transform = translateX(`${-offset}px`);
+      
+            requestAnimationFrame(animate);
+          }
+          requestAnimationFrame(animate);
+      
+          // Drag handling
+          function pointerDown(e) {
+            isDragging = true;
+            dragStartX = e.touches ? e.touches[0].clientX : e.clientX;
+            dragStartPos = pos;
+            track.classList.add("is-grabbing");
+            e.preventDefault();
+          }
+          function pointerMove(e) {
+            if (!isDragging) return;
+            const x = e.touches ? e.touches[0].clientX : e.clientX;
+            const dx = dragStartX - x;
+            pos = dragStartPos + dx;
+          }
+          function pointerUp() {
+            if (!isDragging) return;
+            isDragging = false;
+            track.classList.remove("is-grabbing");
+          }
+      
+          track.addEventListener("mousedown", pointerDown);
+          track.addEventListener("touchstart", pointerDown, { passive: false });
+          window.addEventListener("mousemove", pointerMove);
+          window.addEventListener("touchmove", pointerMove, { passive: false });
+          window.addEventListener("mouseup", pointerUp);
+          window.addEventListener("touchend", pointerUp);
+        })();
+      </script>
+      
+
+    <section id="security" class="bg-dark py-20 px-8">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black mb-6 section-title text-dark">SÉCURITÉ DE NIVEAU ENTREPRISE</h2>
+                <p class="text-xl readable-text-dark max-w-3xl mx-auto">PassSanté utilise les techniques cryptographiques les plus avancées et le DLT Hedera pour protéger vos données de santé les plus sensibles.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="cyber-card-light p-8 relative overflow-hidden group animated-feature-card">
+                    <div class="scan-line"></div>
+                    <div class="w-16 h-16 rounded-xl bg-gradient-to-r from-primary to-light-purple flex items-center justify-center mb-6 neon-glow">
+                        <i class="fas fa-user-shield bg-dark text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-black mb-4 card-title text-dark">PREUVES À CONNAISSANCE NULLE (ZKP)</h3>
+                    <p class="card-text mb-6">Vérifiez l'information sans révéler les données sensibles. Les professionnels peuvent confirmer une éligibilité sans accéder aux détails personnels, assurant une *confidentialité maximale*.</p>
+                    <div class="flex items-center text-primary font-bold">
+                        <span>EXPLORER ZKP</span>
+                        <i class="fas fa-arrow-right ml-3 group-hover:ml-4 transition-all"></i>
+                    </div>
+                </div>
+                
+                <div class="cyber-card-light p-8 relative overflow-hidden group animated-feature-card" style="animation-delay: 0.1s;">
+                    <div class="scan-line" style="animation-delay: 1s;"></div>
+                    <div class="w-16 h-16 rounded-xl bg-gradient-to-r from-light-purple to-primary flex items-center justify-center mb-6 neon-glow">
+                        <i class="fas fa-lock bg-dark text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-black mb-4 card-title text-dark">CHIFFREMENT DE BOUT EN BOUT</h3>
+                    <p class="card-text mb-6">Toutes les données sont chiffrées avec *AES-256* avant d'être stockées. Seul vous détenez les clés de déchiffrement, garantissant la *souveraineté complète des données*.</p>
+                    <div class="flex items-center text-primary font-bold">
+                        <span>VOIR CHIFFREMENT</span>
+                        <i class="fas fa-arrow-right ml-3 group-hover:ml-4 transition-all"></i>
+                    </div>
+                </div>
+                
+                <div class="cyber-card-light p-8 relative overflow-hidden group animated-feature-card" style="animation-delay: 0.2s;">
+                    <div class="scan-line" style="animation-delay: 2s;"></div>
+                    <div class="w-16 h-16 rounded-xl bg-gradient-to-r from-primary to-purple flex items-center justify-center mb-6 neon-glow">
+                        <i class="fas fa-network-wired bg-dark text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-black mb-4 card-title text-dark">CONSENSUS HEDERA ABFT</h3>
+                    <p class="card-text mb-6">Le Hashgraph utilise le consensus *aBFT* (asynchrone Byzantine Fault Tolerance), l'algorithme le plus sécurisé, pour une intégrité des données *mathématiquement prouvée*.</p>
+                    <div class="flex items-center text-primary font-bold">
+                        <span>ÉTUDIER HEDERA</span>
+                        <i class="fas fa-arrow-right ml-3 group-hover:ml-4 transition-all"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="bg-light py-20 px-8">
+        <div class="container mx-auto max-w-6xl">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-4xl lg:text-5xl font-black mb-6 section-title text-dark">PROPULSÉ PAR <span class="text-primary">HEDERA HASHGRAPH</span></h2>
+                    <p class="text-xl readable-text-dark mb-8">Contrairement aux blockchains traditionnelles, Hedera utilise le Hashgraph – plus rapide, plus sécurisé, et incroyablement économe en énergie, parfait pour les applications de santé.</p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0 w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mr-6">
+                                <i class="fas fa-bolt text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-black mb-2 card-title text-dark">10,000+ TRANSACTIONS PAR SECONDE</h3>
+                                <p class="card-text">La performance de Hedera permet des mises à jour de données de santé en *temps réel* et un accès instantané pour les professionnels autorisés.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex">
+                            <div class="flex-shrink-0 w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mr-6">
+                                <i class="fas fa-leaf text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-black mb-2 card-title text-dark">RÉSEAU CARBONE NÉGATIF</h3>
+                                <p class="card-text">Hedera est le premier registre public décentralisé à être *carbone négatif*, s'alignant sur les objectifs de durabilité du secteur de la santé.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex">
+                            <div class="flex-shrink-0 w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mr-6">
+                                <i class="fas fa-award text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-black mb-2 card-title text-dark">RÉSILIENCE ET SÉCURITÉ</h3>
+                                <p class="card-text">L'architecture aBFT garantit une *haute disponibilité* et une protection contre la perte de données, assurant la continuité des soins même en cas de crise (Cas Réel : Incendie dans un hôpital).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="cyber-card-light p-8 h-96 flex items-center justify-center">
+                        <div class="blockchain-visualization w-full h-full relative" id="blockchainViz">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="timeline" class="bg-dark py-20 px-8">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black mb-6 section-title text-dark">VOTRE PARCOURS DE SANTÉ</h2>
+                <p class="text-xl readable-text-dark max-w-2xl mx-auto">De la naissance à aujourd'hui, suivez votre historique médical complet dans un seul endroit sécurisé avec vérification blockchain immuable.</p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="cyber-card-light p-8">
+                    <div class="flex justify-between mb-8">
+                        <h3 class="text-xl font-bold card-title text-dark">CHRONOLOGIE MÉDICALE</h3>
+                        <div class="flex space-x-2">
+                            <button class="text-primary flex items-center space-x-1">
+                                <i class="fas fa-filter"></i>
+                                <span>FILTRE</span>
+                            </button>
+                            <button class="text-primary flex items-center space-x-1">
+                                <i class="fas fa-search"></i>
+                                <span>RECHERCHE</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="timeline-item">
+                            <div class="flex justify-between mb-1">
+                                <h4 class="font-bold card-title text-dark">EXAMEN ANNUEL</h4>
+                                <span class="text-primary">AUJOURD'HUI</span>
+                            </div>
+                            <p class="card-text mb-2">Examen physique de routine avec le Dr. Smith au Centre Médical</p>
+                            <div class="flex space-x-2">
+                                <span class="px-2 py-1 bg-primary/20 text-primary text-xs rounded">RÉSULTATS NORMAUX</span>
+                                <span class="px-2 py-1 bg-light/20 text-dark text-xs rounded">COMPLÉTÉ</span>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="flex justify-between mb-1">
+                                <h4 class="font-bold card-title text-dark">VACCINATION COVID-19</h4>
+                                <span class="text-primary">IL Y A 3 MOIS</span>
+                            </div>
+                            <p class="card-text mb-2">Deuxième dose de rappel administrée à l'Hôpital de la Ville</p>
+                            <div class="flex space-x-2">
+                                <span class="px-2 py-1 bg-light/20 text-dark text-xs rounded">VACCINATION</span>
+                                <span class="px-2 py-1 bg-primary/20 text-primary text-xs rounded">COMPLÉTÉ</span>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="flex justify-between mb-1">
+                                <h4 class="font-bold card-title text-dark">TEST D'ALLERGIE</h4>
+                                <span class="text-primary">IL Y A 1 AN</span>
+                            </div>
+                            <p class="card-text mb-2">Panel d'allergies complet révélant le pollen et les acariens</p>
+                            <div class="flex space-x-2">
+                                <span class="px-2 py-1 bg-primary/20 text-primary text-xs rounded">DIAGNOSTIC</span>
+                                <span class="px-2 py-1 bg-primary/20 text-primary text-xs rounded">COMPLÉTÉ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="bg-light py-24 px-8">
+        <div class="container mx-auto max-w-4xl text-center">
+            <div class="cyber-card-light p-12 relative overflow-hidden">
+                <div class="scan-line"></div>
+                <h2 class="text-4xl lg:text-5xl font-black mb-6 section-title text-dark">PRÊT À SÉCURISER VOTRE IDENTITÉ DE SANTÉ ?</h2>
+                <p class="text-xl readable-text-dark mb-8 max-w-2xl mx-auto">Rejoignez l'avenir des soins de santé avec PassSanté - vos données vous appartiennent, sécurisées par Hedera, accessibles quand vous en avez besoin.</p>
+                
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                    <button class="cyber-button flex items-center justify-center space-x-2 text-lg py-4 px-8">
+                        <i class="fas fa-id-card"></i>
+                        <span>CRÉER PASSEPORT SANTÉ</span>
+                    </button>
+                    <button class="bg-transparent border border-primary text-primary hover:bg-primary/10 px-8 py-4 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-lg">
+                        <i class="fas fa-vial"></i>
+                        <span>TESTER LA SÉCURITÉ</span>
+                    </button>
+                </div>
+                
+                <div class="mt-8 flex justify-center">
+                    <div class="hedera-badge">
+                        <i class="fas fa-check-circle text-primary"></i>
+                        <span>SÉCURISÉ PAR HEDERA HASHGRAPH</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer class="bg-dark py-12 px-8 border-t border-purple/20">
+        <div class="container mx-auto max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                            <svg width="24" height="24" viewBox="0 0 141.62 137.5">
+                                <path fill="#FFFFFF" d="M92.18,20.08v25.23l-25.96.31c-9.3.11-16.79,7.69-16.79,16.99v29.56h-31.79c-5.39,0-10.52-2.61-13.49-7.1-6.75-10.19-4.64-20.82,1.72-27.18,3.64-3.64,8.66-5.88,14.2-5.88h16.48c8.53,0,15.45-6.92,15.45-15.45v-18.91c0-5.39,2.61-10.52,7.1-13.49,10.19-6.75,20.82-4.64,27.18,1.72,3.64,3.64,5.88,8.66,5.88,14.2Z"/>
+                                <path fill="#FFFFFF" d="M137.23,52.07c7.03,10.3,4.95,21.1-1.49,27.53-3.64,3.64-8.66,5.88-14.2,5.88h-16.82c-8.34,0-15.11,6.76-15.11,15.11v19.67c0,5.13-2.52,9.94-6.75,12.84-10.3,7.03-21.1,4.95-27.53-1.49-3.64-3.64-5.88-8.66-5.88-14.2v-25.23h42.74v-46.86h32.21c5.13,0,9.94,2.52,12.84,6.75Z"/>
+                            </svg>
+                        </div>
+                        <span class="text-2xl font-black text-dark">Pass<span class="text-primary">Santé</span></span>
+                    </div>
+                    <p class="card-text mb-6">L'avenir de l'identité de santé sécurisée et décentralisée, propulsé par Hedera Hashgraph.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-light hover:text-primary transition-colors text-xl">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-light hover:text-primary transition-colors text-xl">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="text-light hover:text-primary transition-colors text-xl">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-black mb-6 card-title text-dark">PRODUIT</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">Passeport Santé</a></li>
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">Fonctionnalités Sécurité</a></li>
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">Intégration Hedera</a></li>
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">Pour les Prestataires</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-black mb-6 card-title text-dark">DÉVELOPPEURS</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">Documentation</a></li>
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">Référence API</a></li>
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">Hedera SDK</a></li>
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">GitHub</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-black mb-6 card-title text-dark">ENTREPRISE</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">À Propos</a></li>
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">Carrières</a></li>
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">Confidentialité</a></li>
+                        <li><a href="#" class="card-text hover:text-primary transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-purple/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="card-text mb-4 md:mb-0">© 2023 PassSanté. Tous droits réservés.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="card-text hover:text-primary transition-colors">Politique de Confidentialité</a>
+                    <a href="#" class="card-text hover:text-primary transition-colors">Conditions d'Utilisation</a>
+                    <a href="#" class="card-text hover:text-primary transition-colors">Réseau Hedera</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Existing JS for logo and data stream...
+        
+        // Logo animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoPaths = document.querySelectorAll('.logo-animation path');
+            logoPaths.forEach(path => {
+                const length = path.getTotalLength();
+                path.style.strokeDasharray = length;
+                path.style.strokeDashoffset = length;
+                
+                // Animate the logo
+                setTimeout(() => {
+                    path.style.transition = 'stroke-dashoffset 2s ease-in-out';
+                    path.style.strokeDashoffset = '0';
+                }, 500);
+            });
+        });
+        
+        // Data stream effect
+        const dataStream = document.getElementById('dataStream');
+        for(let i = 0; i < 50; i++) {
+            const bit = document.createElement('div');
+            bit.className = 'data-bit';
+            bit.style.left = Math.random() * 100 + '%';
+            bit.style.animationDelay = Math.random() * 5 + 's';
+            dataStream.appendChild(bit);
+        }
+        
+        // Blockchain visualization (unchanged functionality)
+        const blockchainViz = document.getElementById('blockchainViz');
+        const nodes = 5;
+        const radius = 120;
+        
+        for(let i = 0; i < nodes; i++) {
+            const angle = (i / nodes) * 2 * Math.PI;
+            const x = radius * Math.cos(angle) + 200;
+            const y = radius * Math.sin(angle) + 150;
+            
+            // Create node
+            const node = document.createElement('div');
+            node.className = 'blockchain-node';
+            node.style.position = 'absolute';
+            node.style.left = x + 'px';
+            node.style.top = y + 'px';
+            blockchainViz.appendChild(node);
+            
+            // Create connections to next node
+            if(i < nodes - 1) {
+                const nextAngle = ((i+1) / nodes) * 2 * Math.PI;
+                const nextX = radius * Math.cos(nextAngle) + 200;
+                const nextY = radius * Math.sin(nextAngle) + 150;
+                
+                const connection = document.createElement('div');
+                connection.className = 'blockchain-connection';
+                
+                const length = Math.sqrt(Math.pow(nextX - x, 2) + Math.pow(nextY - y, 2));
+                const angleDeg = Math.atan2(nextY - y, nextX - x) * 180 / Math.PI;
+                
+                connection.style.width = length + 'px';
+                connection.style.left = x + 'px';
+                connection.style.top = y + 'px';
+                connection.style.transform = rotate(`${angleDeg}deg`);
+                
+                blockchainViz.appendChild(connection);
+            }
+        }
+        
+        // Center node
+        const centerNode = document.createElement('div');a
+        centerNode.className = 'blockchain-node';
+        centerNode.style.position = 'absolute';
+        centerNode.style.left = '200px';
+        centerNode.style.top = '150px';
+        centerNode.style.width = '20px';
+        centerNode.style.height = '20px';
+        centerNode.innerHTML = '<i class="fas fa-dna" style="font-size: 8px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white;"></i>';
+        blockchainViz.appendChild(centerNode);
+        
+        // GSAP Animations
+        gsap.registerPlugin(ScrollTrigger);
+        
+        // Animate elements on scroll (Updated to use animated-feature-card class)
+        gsap.utils.toArray('.animated-feature-card').forEach((card, i) => {
+            gsap.fromTo(card, {
+                y: 100,
+                opacity: 0
+            }, {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                delay: i * 0.1,
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 80%",
+                    end: "bottom 20%",
+                    toggleActions: "play none none reverse"
+                }
+            });
+        });
+        
+        // Animate blockchain nodes (unchanged)
+        gsap.utils.toArray('.blockchain-node').forEach((node, i) => {
+            gsap.fromTo(node, {
+                scale: 0,
+                rotation: 180
+            }, {
+                scale: 1,
+                rotation: 0,
+                duration: 1,
+                delay: i * 0.2,
+                scrollTrigger: {
+                    trigger: '.blockchain-visualization',
+                    start: "top 80%",
+                    end: "bottom 20%",
+                    toggleActions: "play none none reverse"
+                }
+            });
+        });
+        
+        // Add hover effects to cyber cards (updated to light card class)
+        document.querySelectorAll('.cyber-card-light').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                gsap.to(card, { y: -10, duration: 0.3 });
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, { y: 0, duration: 0.3 });
+            });
+        });
+
+
+        /* NEW JS for Tabbed Feature Content */
+        const featureTabs = document.querySelectorAll('.feature-tab');
+        const featureCards = document.querySelectorAll('.feature-card');
+
+        featureTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const role = tab.getAttribute('data-role');
+
+                // 1. Update active tab state
+                featureTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // 2. Animate and switch content
+                featureCards.forEach(card => {
+                    if (card.getAttribute('data-role') === role) {
+                        // Fade in and slide up the new card
+                        card.classList.remove('hidden');
+                        gsap.fromTo(card, {
+                            opacity: 0,
+                            y: 20
+                        }, {
+                            opacity: 1,
+                            y: 0,
+                            duration: 0.5,
+                            ease: 'power2.out'
+                        });
+                    } else {
+                        // Hide other cards immediately
+                        card.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2665 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PassSanté - Système de Santé</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="icons.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        patient: '#C768FF',
+                        doctor: '#4A7BFF',
+                        paramedic: '#FF4A4A',
+                        pharmacist: '#4ACF7F',
+                        'dark-purple': '#18016B',
+                        'light-purple': '#D9E3FF',
+                        'bg-card': '#FFFFFF',
+                    },
+                    animation: {
+                        'gradient': 'gradient 15s ease infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'grid-move': 'gridMove 20s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Your existing CSS styles remain the same */
+        .cyber-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(199, 104, 255, 0.3);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .cyber-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.7s ease;
+        }
+        
+        .cyber-card:hover::before {
+            left: 100%;
+        }
+        
+        .cyber-card:hover {
+            transform: translateY(-10px) scale(1.002);
+            box-shadow: 0 25px 50px -12px rgba(199, 104, 255, 0.4);
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(-50px) translateY(-50px); }
+        }
+        
+        /* Grille 3D animée */
+        .grid-3d {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(195, 104, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(195, 104, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(74, 123, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 123, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px, 50px 50px, 100px 100px, 100px 100px;
+            transform: perspective(500px) rotateX(60deg);
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
+        }
+        
+        .role-gradient {
+            background: linear-gradient(135deg, #C768FF, #4A7BFF, #FF4A4A, #4ACF7F);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .chat-bubble {
+            border-radius: 20px;
+            max-width: 80%;
+            padding: 12px 16px;
+            margin: 8px 0;
+        }
+        
+        .user-message {
+            background-color: #4A7BFF;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .bot-message {
+            background-color: #F0F4FF;
+            color: #18016B;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #888;
+            margin: 0 2px;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typingAnimation {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        .scan-animation {
+            animation: scan 2s ease-in-out infinite;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateY(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+        
+        .qr-scanner {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .qr-scanner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #4ACF7F, transparent);
+            animation: scan 2s ease-in-out infinite;
+        }
+        
+        @keyframes spin-logo {
+            0%{
+                transform: rotate(0) ;
+            }
+            100%{
+                transform: rotate(360deg) ;
+            }
+        }
+        
+        @keyframes hidden {
+            100%{
+                display: none;
+            }
+        }
+        
+        @keyframes up-logo {
+            0%{
+                translate: 0 100vh;
+            }
+            70%{
+                translate:  0 -30px ;
+            }
+            100%{
+                translate:  0 0 ;
+            }
+        }
+        
+        .spin-logo{
+            animation:  gradient 15s ease infinite , up-logo 3s ease-in-out forwards  , spin-logo 2s linear infinite ;
+        }
+        
+        .spin-logo::after{
+            content: 'test';
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            filter: blur(10px);
+            z-index: -1;
+        }
+        
+        .logo-start{
+            animation: hidden 1s 3s linear forwards;
+        }
+        
+        .step-form {
+            display: none;
+        }
+        
+        .step-form.active {
+            display: block;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #E5E7EB;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #C768FF, #4A7BFF);
+            transition: width 0.5s ease;
+        }
+        
+        .document-scanner {
+            border: 2px dashed #C768FF;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .document-scanner:hover {
+            background: rgba(199, 104, 255, 0.05);
+        }
+        
+        .document-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .loading-dots {
+            display: inline-block;
+        }
+        
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-light-purple to-white min-h-screen text-dark-purple overflow-x-hidden">
+    <div class="logo-start bg-white w-full h-[100vh] z-50 flex justify-center items-center fixed top-0 left-0">
+        <div class="role-gradient w-20 h-20 rounded-2xl mx-auto mb-4 flex items-center justify-center spin-logo">
+            <!-- <i class="fas fa-heartbeat text-white text-3xl"></i> -->
+            <img class="fas fa-heartbeat text-white text-3xl" src="./android/android-launchericon-72-72.png"/>
+        </div>
+    </div>
+    
+    <!-- Grille 3D animée en arrière-plan -->
+    <div class="grid-3d"></div>
+    
+    <!-- Main App Container -->
+    <div id="app" class="relative z-10 min-h-screen flex flex-col">
+        
+        <!-- Authentication Screen -->
+        <div id="auth-screen" class="flex flex-col items-center justify-center min-h-screen p-6 animate-fade-in">
+            <div class="glass-effect rounded-3xl p-8 w-full max-w-md shadow-2xl">
+                <div class="text-center mb-8">
+                    <div class="role-gradient w-20 h-20 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                        <!-- <i class="fas fa-heartbeat text-white text-3xl"></i> -->
+                          <img class="fas fa-heartbeat text-white text-3xl" src="./android/android-launchericon-72-72.png"/>
+                    </div>
+                    <h1 class="text-3xl font-bold">PassSanté</h1>
+                    <p class="text-gray-600 mt-2">Système de santé intégré</p>
+                </div>
+                
+                <!-- Login Form -->
+                <div id="login-form">
+                    <div class="mb-6">
+                        <h2 class="text-xl font-semibold mb-4 text-center">Connexion Sécurisée</h2>
+                        
+                        <!-- Simulation de connexion CIN réelle -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-id-card text-blue-500 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="text-sm text-blue-800 font-medium">Authentification CIN & CAN</p>
+                                    <p class="text-xs text-blue-600">Double vérification de sécurité</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form class="login-form" id="loginForm">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="nationalId" class="block text-sm font-medium mb-1">
+                                        <i class="fas fa-address-card mr-2"></i>Numéro de Carte Nationale
+                                    </label>
+                                    <input type="text" id="nationalId" placeholder="Entrez votre numéro de carte nationale" required 
+                                           class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl transition-all focus:border-patient">
+                                </div>
+                                
+                                <div>
+                                    <label for="canNumber" class="block text-sm font-medium mb-1">
+                                        <i class="fas fa-id-card-alt mr-2"></i>Numéro de CAN
+                                    </label>
+                                    <input type="text" id="canNumber" placeholder="Entrez votre numéro de CAN" required 
+                                           class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl transition-all focus:border-patient">
+                                </div>
+                                
+                                <div>
+                                    <label for="password" class="block text-sm font-medium mb-1">
+                                        <i class="fas fa-lock mr-2"></i>Mot de passe
+                                    </label>
+                                    <input type="password" id="password" placeholder="Entrez votre mot de passe" required 
+                                           class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl transition-all focus:border-patient">
+                                </div>
+                                
+                                <!-- Indicateur de sécurité -->
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-shield-alt text-green-500 mr-1"></i>
+                                        <span class="text-green-600">Connexion sécurisée</span>
+                                    </div>
+                                    <a href="#" class="text-patient hover:underline">Mot de passe oublié ?</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="mt-6 space-y-4">
+                        <button id="login-btn" class="w-full bg-patient text-white py-3 rounded-xl font-semibold transition-all hover:bg-opacity-90 cyber-card relative overflow-hidden">
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            Connexion avec carte nationale
+                            <div id="login-loading" class="hidden absolute inset-0 bg-patient flex items-center justify-center">
+                                <div class="loading-dots text-white">Vérification</div>
+                            </div>
+                        </button>
+                        
+                        <button id="show-register" class="w-full bg-transparent border-2 border-dark-purple text-dark-purple py-3 rounded-xl font-semibold transition-all hover:bg-dark-purple hover:text-white">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Première connexion ? Créer un compte
+                        </button>
+                    </div>
+                    
+                    <!-- Exemple de données pour la démo -->
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-xs text-gray-600 text-center">
+                            <strong>Démo :</strong> Utilisez CIN: <code class="bg-gray-200 px-1 rounded">AA123456</code> + CAN quelconque + mot de passe quelconque
+                        </p>
+                        <p class="text-xs text-gray-600 text-center mt-1">
+                            Ou utilisez n'importe quel CIN/CAN pour accéder aux données de démonstration
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Registration Form (Multi-step) -->
+                <div id="register-form" class="hidden">
+                    <!-- Progress Bar -->
+                    <div class="mb-6">
+                        <div class="progress-bar mb-2">
+                            <div id="progress-fill" class="progress-fill" style="width: 16%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-600">
+                            <span>Rôle</span>
+                            <span>Identité</span>
+                            <span>Coordonnées</span>
+                            <span>Médical</span>
+                            <span>Documents</span>
+                            <span>Validation</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 1: Role Selection -->
+                    <div id="step-1" class="step-form active">
+                        <h2 class="text-xl font-semibold mb-4 text-center">Sélectionnez votre rôle</h2>
+                        
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="text-sm text-blue-800 font-medium">Information importante</p>
+                                    <p class="text-xs text-blue-600">Votre rôle détermine les fonctionnalités auxquelles vous aurez accès</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <button class="role-select cyber-card bg-patient/10 border-2 border-patient/20 rounded-xl p-4 flex flex-col items-center transition-all hover:scale-105" data-role="patient">
+                                <i class="fas fa-user-injured text-patient text-2xl mb-2"></i>
+                                <span class="font-medium">Patient</span>
+                                <p class="text-xs text-gray-500 mt-1 text-center">Accédez à votre suivi médical et ordonnances</p>
+                            </button>
+                            <button class="role-select cyber-card bg-doctor/10 border-2 border-doctor/20 rounded-xl p-4 flex flex-col items-center transition-all hover:scale-105" data-role="doctor">
+                                <i class="fas fa-user-md text-doctor text-2xl mb-2"></i>
+                                <span class="font-medium">Médecin</span>
+                                <p class="text-xs text-gray-500 mt-1 text-center">Gérez vos patients et prescriptions</p>
+                            </button>
+                            <button class="role-select cyber-card bg-paramedic/10 border-2 border-paramedic/20 rounded-xl p-4 flex flex-col items-center transition-all hover:scale-105" data-role="paramedic">
+                                <i class="fas fa-ambulance text-paramedic text-2xl mb-2"></i>
+                                <span class="font-medium">Secouriste</span>
+                                <p class="text-xs text-gray-500 mt-1 text-center">Accédez aux informations d'urgence</p>
+                            </button>
+                            <button class="role-select cyber-card bg-pharmacist/10 border-2 border-pharmacist/20 rounded-xl p-4 flex flex-col items-center transition-all hover:scale-105" data-role="pharmacist">
+                                <i class="fas fa-pills text-pharmacist text-2xl mb-2"></i>
+                                <span class="font-medium">Pharmacien</span>
+                                <p class="text-xs text-gray-500 mt-1 text-center">Gérez les ordonnances et stocks</p>
+                            </button>
+                        </div>
+                        
+                        <div class="flex justify-between mt-6">
+                            <button id="back-to-login" class="bg-transparent border-2 border-dark-purple text-dark-purple py-2 px-6 rounded-xl font-medium hover:bg-dark-purple hover:text-white">
+                                <i class="fas fa-arrow-left mr-2"></i>Retour
+                            </button>
+                            <button id="next-to-step2" class="bg-patient text-white py-2 px-6 rounded-xl font-medium opacity-50 cursor-not-allowed" disabled>
+                                Suivant <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Identity Information -->
+                    <div id="step-2" class="step-form">
+                        <h2 class="text-xl font-semibold mb-4 text-center">Vérification d'identité</h2>
+                        
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-exclamation-triangle text-yellow-500 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="text-sm text-yellow-800 font-medium">Information importante</p>
+                                    <p class="text-xs text-yellow-600">Vos informations doivent correspondre à votre carte d'identité nationale</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="firstname" class="block text-sm font-medium mb-1">Prénom</label>
+                                    <input type="text" id="firstname" placeholder="Votre prénom" 
+                                           class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                </div>
+                                <div>
+                                    <label for="lastname" class="block text-sm font-medium mb-1">Nom</label>
+                                    <input type="text" id="lastname" placeholder="Votre nom" 
+                                           class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="cin" class="block text-sm font-medium mb-1">
+                                    <i class="fas fa-id-card mr-2"></i>Numéro Carte Nationale
+                                </label>
+                                <input type="text" id="cin" placeholder="AA123456" 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                <p class="text-xs text-gray-500 mt-1">Vérification automatique avec le registre national</p>
+                            </div>
+                            
+                            <div>
+                                <label for="canNumberRegister" class="block text-sm font-medium mb-1">
+                                    <i class="fas fa-id-card-alt mr-2"></i>Numéro de CAN
+                                </label>
+                                <input type="text" id="canNumberRegister" placeholder="Votre numéro de CAN" 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                            </div>
+                            
+                            <div>
+                                <label for="birthdate" class="block text-sm font-medium mb-1">Date de naissance</label>
+                                <input type="date" id="birthdate" 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                            </div>
+                            
+                            <div>
+                                <label for="birthplace" class="block text-sm font-medium mb-1">Lieu de naissance</label>
+                                <input type="text" id="birthplace" placeholder="Ville de naissance" 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between mt-6">
+                            <button id="back-to-step1" class="bg-transparent border-2 border-dark-purple text-dark-purple py-2 px-6 rounded-xl font-medium hover:bg-dark-purple hover:text-white">
+                                <i class="fas fa-arrow-left mr-2"></i>Retour
+                            </button>
+                            <button id="next-to-step3" class="bg-patient text-white py-2 px-6 rounded-xl font-medium">
+                                Suivant <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Contact Information -->
+                    <div id="step-3" class="step-form">
+                        <h2 class="text-xl font-semibold mb-4 text-center">Coordonnées et Sécurité</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label for="email" class="block text-sm font-medium mb-1">
+                                    <i class="fas fa-envelope mr-2"></i>Adresse email
+                                </label>
+                                <input type="email" id="email" placeholder="votre@email.com" 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                <p class="text-xs text-gray-500 mt-1">Utilisée pour la récupération de compte</p>
+                            </div>
+                            
+                            <div>
+                                <label for="phone" class="block text-sm font-medium mb-1">
+                                    <i class="fas fa-phone mr-2"></i>Téléphone mobile
+                                </label>
+                                <input type="tel" id="phone" placeholder="+212 6 XX XX XX XX" 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                            </div>
+                            
+                            <div>
+                                <label for="address" class="block text-sm font-medium mb-1">
+                                    <i class="fas fa-home mr-2"></i>Adresse complète
+                                </label>
+                                <textarea id="address" placeholder="N°, Rue, Ville, Code postal" rows="2"
+                                          class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl"></textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="passwordRegister" class="block text-sm font-medium mb-1">
+                                        <i class="fas fa-lock mr-2"></i>Mot de passe
+                                    </label>
+                                    <input type="password" id="passwordRegister" placeholder="Minimum 8 caractères" 
+                                           class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                </div>
+                                <div>
+                                    <label for="confirm-password" class="block text-sm font-medium mb-1">
+                                        <i class="fas fa-lock mr-2"></i>Confirmation
+                                    </label>
+                                    <input type="password" id="confirm-password" placeholder="Répétez le mot de passe" 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                </div>
+                            </div>
+                            
+                            <!-- Indicateur de force du mot de passe -->
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <p class="text-xs font-medium mb-2">Sécurité du mot de passe</p>
+                                <div class="flex items-center space-x-2 text-xs">
+                                    <div class="w-1/4 h-1 bg-gray-300 rounded-full"></div>
+                                    <div class="w-1/4 h-1 bg-gray-300 rounded-full"></div>
+                                    <div class="w-1/4 h-1 bg-gray-300 rounded-full"></div>
+                                    <div class="w-1/4 h-1 bg-gray-300 rounded-full"></div>
+                                    <span class="text-gray-500">Faible</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between mt-6">
+                            <button id="back-to-step2" class="bg-transparent border-2 border-dark-purple text-dark-purple py-2 px-6 rounded-xl font-medium hover:bg-dark-purple hover:text-white">
+                                <i class="fas fa-arrow-left mr-2"></i>Retour
+                            </button>
+                            <button id="next-to-step4" class="bg-patient text-white py-2 px-6 rounded-xl font-medium">
+                                Suivant <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Medical Information (seulement pour les patients) -->
+                    <div id="step-4" class="step-form">
+                        <h2 class="text-xl font-semibold mb-4 text-center">Profil Médical</h2>
+                        
+                        <div id="medical-info-patient" class="space-y-4">
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <p class="text-sm text-blue-800 font-medium">Données sensibles</p>
+                                        <p class="text-xs text-blue-600">Ces informations sont cruciales pour vos soins d'urgence</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="blood-type" class="block text-sm font-medium mb-1">Groupe sanguin</label>
+                                    <select id="blood-type" class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                        <option value="">Sélectionnez</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="weight" class="block text-sm font-medium mb-1">Poids (kg)</label>
+                                    <input type="number" id="weight" placeholder="70" 
+                                           class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="height" class="block text-sm font-medium mb-1">Taille (cm)</label>
+                                    <input type="number" id="height" placeholder="175" 
+                                           class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                </div>
+                                <div>
+                                    <label for="emergency-contact" class="block text-sm font-medium mb-1">Contact urgence</label>
+                                    <input type="tel" id="emergency-contact" placeholder="+212 6 XX XX XX XX" 
+                                           class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="allergies" class="block text-sm font-medium mb-1">Allergies connues</label>
+                                <input type="text" id="allergies" placeholder="Pénicilline, Arachides, Aspirine..." 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                                <p class="text-xs text-gray-500 mt-1">Séparées par des virgules</p>
+                            </div>
+                            
+                            <div>
+                                <label for="chronic-conditions" class="block text-sm font-medium mb-1">Antécédents médicaux</label>
+                                <textarea id="chronic-conditions" placeholder="Diabète, Hypertension, Asthme, Chirurgies..." rows="3"
+                                          class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div id="professional-info" class="hidden space-y-4">
+                            <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-user-md text-green-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <p class="text-sm text-green-800 font-medium">Informations professionnelles</p>
+                                        <p class="text-xs text-green-600">Renseignez vos informations professionnelles</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="license-number" class="block text-sm font-medium mb-1">Numéro de licence/Ordre</label>
+                                <input type="text" id="license-number" placeholder="Votre numéro professionnel" 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                            </div>
+                            
+                            <div>
+                                <label for="speciality" class="block text-sm font-medium mb-1">Spécialité/Service</label>
+                                <input type="text" id="speciality" placeholder="Votre spécialité ou service" 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                            </div>
+                            
+                            <div>
+                                <label for="establishment" class="block text-sm font-medium mb-1">Établissement</label>
+                                <input type="text" id="establishment" placeholder="Nom de votre établissement" 
+                                       class="w-full bg-transparent p-3 border-dark-purple border-2 outline-none rounded-xl">
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between mt-6">
+                            <button id="back-to-step3" class="bg-transparent border-2 border-dark-purple text-dark-purple py-2 px-6 rounded-xl font-medium hover:bg-dark-purple hover:text-white">
+                                <i class="fas fa-arrow-left mr-2"></i>Retour
+                            </button>
+                            <button id="next-to-step5" class="bg-patient text-white py-2 px-6 rounded-xl font-medium">
+                                Suivant <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 5: Document Scan -->
+                    <div id="step-5" class="step-form">
+                        <h2 class="text-xl font-semibold mb-4 text-center">Documents</h2>
+                        
+                        <div class="space-y-6">
+                            <div class="document-scanner" id="document-scanner">
+                                <i class="fas fa-file-medical text-4xl text-patient mb-3"></i>
+                                <p class="font-medium">Scanner un document</p>
+                                <p class="text-sm text-gray-600 mt-1" id="document-description">Documents médicaux, ordonnances, résultats d'analyses...</p>
+                                <input type="file" id="document-upload" accept="image/*,.pdf" class="hidden">
+                            </div>
+                            
+                            <div id="document-preview" class="hidden text-center">
+                                <img id="preview-image" class="document-preview mx-auto mb-3">
+                                <p class="text-sm text-green-600 font-medium">
+                                    <i class="fas fa-check-circle mr-1"></i>Document scanné avec succès!
+                                </p>
+                                <button id="rescan-document" class="text-patient text-sm font-medium mt-2">
+                                    <i class="fas fa-redo mr-1"></i> Rescanner
+                                </button>
+                            </div>
+                            
+                            <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <p class="text-sm text-green-800">
+                                            <strong>Analyse automatique :</strong> Vos documents seront analysés et intégrés à votre profil.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between mt-6">
+                            <button id="back-to-step4" class="bg-transparent border-2 border-dark-purple text-dark-purple py-2 px-6 rounded-xl font-medium hover:bg-dark-purple hover:text-white">
+                                <i class="fas fa-arrow-left mr-2"></i>Retour
+                            </button>
+                            <button id="next-to-step6" class="bg-patient text-white py-2 px-6 rounded-xl font-medium">
+                                Suivant <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 6: Validation -->
+                    <div id="step-6" class="step-form">
+                        <h2 class="text-xl font-semibold mb-4 text-center">Validation Finale</h2>
+                        
+                        <div class="bg-patient/10 rounded-xl p-6 mb-6">
+                            <div class="text-center">
+                                <i class="fas fa-check-circle text-4xl text-patient mb-3"></i>
+                                <h3 class="text-lg font-bold text-dark-purple mb-2">Votre profil est complet !</h3>
+                                <p class="text-sm text-gray-600">Vérifiez vos informations avant validation</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4 mb-6">
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">Rôle :</span>
+                                <span id="review-role" class="font-medium">-</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">Nom complet :</span>
+                                <span id="review-name" class="font-medium">-</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">CIN :</span>
+                                <span id="review-cin" class="font-medium">-</span>
+                            </div>
+                            <div class="flex justify-between border-b pb-2">
+                                <span class="text-gray-600">Email :</span>
+                                <span id="review-email" class="font-medium">-</span>
+                            </div>
+                            <div id="review-medical" class="hidden">
+                                <div class="flex justify-between border-b pb-2">
+                                    <span class="text-gray-600">Groupe sanguin :</span>
+                                    <span id="review-blood" class="font-medium">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-shield-alt text-yellow-500 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="text-sm text-yellow-800 font-medium">Consentement éclairé</p>
+                                    <p class="text-xs text-yellow-600">
+                                        En validant, vous acceptez le traitement de vos données 
+                                        conformément à la réglementation en vigueur.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between mt-6">
+                            <button id="back-to-step5" class="bg-transparent border-2 border-dark-purple text-dark-purple py-2 px-6 rounded-xl font-medium hover:bg-dark-purple hover:text-white">
+                                <i class="fas fa-arrow-left mr-2"></i>Retour
+                            </button>
+                            <button id="complete-registration" class="bg-pharmacist text-white py-2 px-6 rounded-xl font-medium relative overflow-hidden">
+                                <i class="fas fa-check mr-2"></i>
+                                Valider l'inscription
+                                <div id="register-loading" class="hidden absolute inset-0 bg-pharmacist flex items-center justify-center">
+                                    <div class="loading-dots text-white">Création du compte</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center text-gray-500">
+                <p><i class="fas fa-lock mr-2"></i>Application sécurisée - Données cryptées - RGPD conforme</p>
+            </div>
+        </div>
+        
+        <!-- Dashboard (Hidden by default) -->
+        <div id="dashboard" class="hidden min-h-screen">
+            <!-- Header -->
+            <header class="sticky top-0 z-20 glass-effect p-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <div id="user-avatar" class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                        <!-- Avatar will be set based on role -->
+                    </div>
+                    <div>
+                        <h2 id="user-name" class="font-semibold">Nom Utilisateur</h2>
+                        <p id="user-role" class="text-xs opacity-70">Rôle</p>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button class="p-2 rounded-full bg-white/50">
+                        <i class="fas fa-bell text-dark-purple"></i>
+                    </button>
+                    <button id="logout-btn" class="p-2 rounded-full bg-white/50">
+                        <i class="fas fa-sign-out-alt text-dark-purple"></i>
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Main Content -->
+            <main class="flex-1 p-4 pb-24">
+                <!-- Dashboard content will be loaded here based on role -->
+                <div id="dashboard-content">
+                    <!-- Content will be dynamically loaded -->
+                </div>
+            </main>
+            
+            <!-- Bottom Navigation -->
+            <nav class="fixed bottom-0 left-0 right-0 glass-effect p-3 flex justify-around items-center border-t border-white/30">
+                <button class="nav-btn active flex flex-col items-center p-2 text-dark-purple" data-page="dashboard">
+                    <i class="fas fa-home mb-1"></i>
+                    <span class="text-xs">Accueil</span>
+                </button>
+                <button class="nav-btn flex flex-col items-center p-2 text-dark-purple" data-page="medical-history">
+                    <i class="fas fa-history mb-1"></i>
+                    <span class="text-xs">Suivis</span>
+                </button>
+                <button class="nav-btn flex flex-col items-center p-2 text-dark-purple" data-page="qr-code">
+                    <i class="fas fa-qrcode mb-1"></i>
+                    <span class="text-xs">QR Code</span>
+                </button>
+                <button class="nav-btn flex flex-col items-center p-2 text-dark-purple" data-page="prescriptions">
+                    <i class="fas fa-file-prescription mb-1"></i>
+                    <span class="text-xs">Ordonnances</span>
+                </button>
+                <button class="nav-btn flex flex-col items-center p-2 text-dark-purple" data-page="profile">
+                    <i class="fas fa-user mb-1"></i>
+                    <span class="text-xs">Profil</span>
+                </button>
+            </nav>
+        </div>
+        
+        <!-- Chat Bot -->
+        <div id="chat-bot" class="fixed bottom-28 right-4 z-30 hidden">
+            <div id="chat-container" class="bg-white rounded-2xl shadow-2xl w-80 h-96 flex flex-col mb-4 overflow-hidden">
+                <div class="bg-dark-purple text-white p-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center mr-2">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Assistant PassBot</h3>
+                            <p class="text-xs opacity-80">En ligne</p>
+                        </div>
+                    </div>
+                    <button id="close-chat" class="text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div id="chat-messages" class="flex-1 p-4 overflow-y-auto">
+                    <div class="bot-message chat-bubble">
+                        <p>Bonjour ! Je suis votre assistant PassBot. Comment puis-je vous aider aujourd'hui ?</p>
+                    </div>
+                </div>
+                
+                <div class="p-3 border-t border-gray-200">
+                    <div class="flex">
+                        <input type="text" id="chat-input" placeholder="Tapez votre message..." class="flex-1 border border-gray-300 rounded-l-xl p-3 text-sm focus:outline-none focus:ring-1 focus:ring-dark-purple">
+                        <button id="send-message" class="bg-dark-purple text-white rounded-r-xl px-4 ring-1 ring-dark-purple ">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Toggle Button -->
+        <button id="chat-toggle" class="fixed bottom-28 right-4 z-20 w-14 h-14 rounded-full bg-dark-purple text-white shadow-lg flex items-center justify-center transition-all hover:scale-110">
+            <i class="fas fa-robot text-xl"></i>
+        </button>
+    </div>
+
+    <script>
+         if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('service-worker.js')
+            .then(() => {console.log('✅ Service Worker registered')
+                let deferredPrompt;
+                // const installBtn = document.getElementById('toapp');
+                //   installBtn.style.display = 'inline-block';            
+                // installBtn.addEventListener('click', async () => {
+                // //   installBtn.style.display = 'none';
+                document.addEventListener('click', async () => {
+                    deferredPrompt.prompt();
+                  const { outcome } = await deferredPrompt.userChoice;
+                  console.log(`User response: ${outcome}`);
+                  deferredPrompt = null;
+                })
+                  
+                // });
+
+            })
+            .catch(err => console.log('SW fail:', err));
+        }
+
+
+
+        // État de l'application
+        const appState = {
+            currentUser: null,
+            currentRole: null,
+            currentPage: 'dashboard',
+            chatOpen: false,
+            registrationStep: 1,
+            registrationData: {}
+        };
+
+        // Base de données simulée pour la démo
+        const demoUsers = {
+            'AA123456': {
+                name: 'Jean Dupont',
+                cin: 'AA123456',
+                role: 'patient',
+                birthdate: '1978-03-15',
+                bloodType: 'A+',
+                allergies: ['Pénicilline', 'Arachides'],
+                conditions: ['Hypertension'],
+                medications: ['Lisinopril 10mg', 'Atorvastatine 20mg'],
+                bloodPressure: '130/85',
+                heartRate: 72,
+                weight: 78,
+                height: 175
+            },
+            'BB654321': {
+                name: 'Dr. Marie Martin',
+                cin: 'BB654321',
+                role: 'doctor',
+                speciality: 'Cardiologie',
+                establishment: 'Hôpital Central de Paris',
+                patients: ['Jean Dupont', 'Sophie Laurent', 'Pierre Moreau']
+            },
+            'CC789012': {
+                name: 'Samir Ambulancier',
+                cin: 'CC789012',
+                role: 'paramedic',
+                service: 'SAMU 75',
+                interventions: 47
+            },
+            'DD345678': {
+                name: 'Pharmacien Ahmed',
+                cin: 'DD345678',
+                role: 'pharmacist',
+                pharmacy: 'Pharmacie Centrale',
+                prescriptions: 128
+            }
+        };
+
+        // Données de démonstration étendues pour tous les utilisateurs
+        const staticDemoData = {
+            patients: [
+                { 
+                    id: 1, 
+                    name: "Jean Dupont", 
+                    age: 45, 
+                    condition: "Hypertension", 
+                    lastVisit: "2023-10-15",
+                    bloodPressure: "130/85",
+                    heartRate: 72,
+                    weight: 78,
+                    height: 175,
+                    allergies: ["Pénicilline", "Arachides"],
+                    medications: ["Lisinopril 10mg", "Atorvastatine 20mg"]
+                },
+                { 
+                    id: 2, 
+                    name: "Sophie Laurent", 
+                    age: 32, 
+                    condition: "Diabète Type 2", 
+                    lastVisit: "2023-11-02",
+                    bloodPressure: "125/80",
+                    heartRate: 68,
+                    weight: 65,
+                    height: 165,
+                    allergies: ["Sulfamides"],
+                    medications: ["Metformine 500mg", "Gliclazide 30mg"]
+                },
+                { 
+                    id: 3, 
+                    name: "Pierre Moreau", 
+                    age: 58, 
+                    condition: "Asthme", 
+                    lastVisit: "2023-09-28",
+                    bloodPressure: "140/90",
+                    heartRate: 75,
+                    weight: 82,
+                    height: 178,
+                    allergies: ["Aspirine", "Pollen"],
+                    medications: ["Salbutamol", "Budesonide"]
+                }
+            ],
+            prescriptions: [
+                { 
+                    id: 1, 
+                    patient: "Jean Dupont", 
+                    doctor: "Dr. Martin",
+                    medication: "Lisinopril", 
+                    dosage: "10mg",
+                    instructions: "1 comprimé par jour le matin",
+                    date: "2023-10-15",
+                    refills: 3,
+                    status: "active"
+                },
+                { 
+                    id: 2, 
+                    patient: "Sophie Laurent", 
+                    doctor: "Dr. Martin",
+                    medication: "Metformine", 
+                    dosage: "500mg",
+                    instructions: "1 comprimé matin et soir",
+                    date: "2023-11-02",
+                    refills: 2,
+                    status: "active"
+                },
+                { 
+                    id: 3, 
+                    patient: "Pierre Moreau", 
+                    doctor: "Dr. Lefebvre",
+                    medication: "Salbutamol", 
+                    dosage: "100µg",
+                    instructions: "2 inhalations toutes les 4-6 heures si nécessaire",
+                    date: "2023-09-28",
+                    refills: 1,
+                    status: "active"
+                }
+            ],
+            medicalHistory: [
+                {
+                    id: 1,
+                    patient: "Jean Dupont",
+                    date: "2023-10-15",
+                    type: "Consultation de routine",
+                    doctor: "Dr. Martin",
+                    diagnosis: "Hypertension contrôlée",
+                    notes: "Pression artérielle stable. Continuer le traitement actuel.",
+                    tests: ["Pression artérielle: 130/85", "Rythme cardiaque: 72 bpm"]
+                },
+                {
+                    id: 2,
+                    patient: "Sophie Laurent",
+                    date: "2023-11-02",
+                    type: "Suivi diabète",
+                    doctor: "Dr. Martin",
+                    diagnosis: "Diabète type 2 bien équilibré",
+                    notes: "HbA1c à 6.2%. Continuer le traitement actuel.",
+                    tests: ["Glycémie à jeun: 1.10 g/L", "HbA1c: 6.2%"]
+                },
+                {
+                    id: 3,
+                    patient: "Pierre Moreau",
+                    date: "2023-09-28",
+                    type: "Consultation urgente",
+                    doctor: "Dr. Lefebvre",
+                    diagnosis: "Crise d'asthme modérée",
+                    notes: "Crise résolue avec bronchodilatateur. Adaptation du traitement.",
+                    tests: ["Débit expiratoire de pointe: 350 L/min"]
+                }
+            ],
+            appointments: [
+                {
+                    id: 1,
+                    patient: "Jean Dupont",
+                    doctor: "Dr. Martin",
+                    date: "2023-12-10",
+                    time: "10:30",
+                    reason: "Contrôle tension artérielle",
+                    status: "Confirmé"
+                },
+                {
+                    id: 2,
+                    patient: "Sophie Laurent",
+                    doctor: "Dr. Martin",
+                    date: "2023-12-15",
+                    time: "14:00",
+                    reason: "Bilan trimestriel diabète",
+                    status: "Confirmé"
+                },
+                {
+                    id: 3,
+                    patient: "Pierre Moreau",
+                    doctor: "Dr. Lefebvre",
+                    date: "2023-12-20",
+                    time: "09:15",
+                    reason: "Contrôle asthme",
+                    status: "En attente"
+                }
+            ],
+            alerts: [
+                {
+                    id: 1,
+                    type: "Rappel",
+                    message: "Rendez-vous avec Dr. Martin le 10 décembre à 10h30",
+                    date: "2023-12-05",
+                    priority: "medium"
+                },
+                {
+                    id: 2,
+                    type: "Médicament",
+                    message: "Renouvellement d'ordonnance nécessaire pour Lisinopril",
+                    date: "2023-12-01",
+                    priority: "low"
+                },
+                {
+                    id: 3,
+                    type: "Résultats",
+                    message: "Nouveaux résultats d'analyses disponibles",
+                    date: "2023-11-28",
+                    priority: "low"
+                }
+            ]
+        };
+
+        // Fonctions utilitaires
+        function getRoleDisplayName(role) {
+            switch(role) {
+                case 'patient': return 'Patient';
+                case 'doctor': return 'Médecin';
+                case 'paramedic': return 'Secouriste';
+                case 'pharmacist': return 'Pharmacien';
+                default: return 'Utilisateur';
+            }
+        }
+        
+        function getRoleIcon(role) {
+            switch(role) {
+                case 'patient': return 'fa-user-injured';
+                case 'doctor': return 'fa-user-md';
+                case 'paramedic': return 'fa-ambulance';
+                case 'pharmacist': return 'fa-pills';
+                default: return 'fa-user';
+            }
+        }
+        
+        function getRoleColor(role) {
+            switch(role) {
+                case 'patient': return 'patient';
+                case 'doctor': return 'doctor';
+                case 'paramedic': return 'paramedic';
+                case 'pharmacist': return 'pharmacist';
+                default: return 'dark-purple';
+            }
+        }
+        
+        function simulateCINVerification(cin, can) {
+            // Simulation de vérification CIN avec délai réaliste
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const user = demoUsers[cin];
+                    if (user && can) { // Vérification basique du CAN (présence)
+                        resolve({ success: true, user: user });
+                    } else {
+                        // Si l'utilisateur n'est pas dans la base de données, créer un utilisateur de démonstration
+                        const demoUser = createDemoUser(cin);
+                        resolve({ success: true, user: demoUser });
+                    }
+                }, 1500);
+            });
+        }
+
+        // Créer un utilisateur de démonstration pour n'importe quel CIN
+        function createDemoUser(cin) {
+            const roles = ['patient', 'doctor', 'paramedic', 'pharmacist'];
+            const randomRole = roles[Math.floor(Math.random() * roles.length)];
+            
+            const firstNames = ['Jean', 'Marie', 'Pierre', 'Sophie', 'Ahmed', 'Fatima', 'David', 'Sarah'];
+            const lastNames = ['Dupont', 'Martin', 'Bernard', 'Moreau', 'Simon', 'Laurent', 'Lefebvre', 'Michel'];
+            
+            const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+            
+            let demoUser = {
+                name: `${firstName} ${lastName}`,
+                cin: cin,
+                role: randomRole,
+                birthdate: '1980-01-01',
+                bloodType: 'A+',
+                allergies: [],
+                conditions: [],
+                medications: [],
+                bloodPressure: '120/80',
+                heartRate: 70,
+                weight: 70,
+                height: 170
+            };
+            
+            // Ajouter des données spécifiques selon le rôle
+            switch(randomRole) {
+                case 'patient':
+                    demoUser.allergies = ['Aucune allergie connue'];
+                    demoUser.conditions = ['Aucune condition chronique'];
+                    demoUser.medications = ['Aucun médicament en cours'];
+                    break;
+                case 'doctor':
+                    demoUser.speciality = 'Médecine Générale';
+                    demoUser.establishment = 'Centre Médical Principal';
+                    demoUser.patients = ['Jean Dupont', 'Sophie Laurent'];
+                    break;
+                case 'paramedic':
+                    demoUser.service = 'SAMU';
+                    demoUser.interventions = Math.floor(Math.random() * 100);
+                    break;
+                case 'pharmacist':
+                    demoUser.pharmacy = 'Pharmacie du Centre';
+                    demoUser.prescriptions = Math.floor(Math.random() * 200);
+                    break;
+            }
+            
+            return demoUser;
+        }
+
+        function animateElements() {
+            const elements = document.querySelectorAll('.animate-slide-up, .animate-fade-in');
+            elements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+            });
+            
+            setTimeout(() => {
+                elements.forEach(el => {
+                    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                });
+            }, 100);
+        }
+
+        // Fonctions pour la gestion du formulaire d'inscription
+        function updateProgressBar(step) {
+            const progressPercentage = (step / 6) * 100;
+            document.getElementById('progress-fill').style.width = `${progressPercentage}%`;
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            
+            document.getElementById(`step-${step}`).classList.add('active');
+            updateProgressBar(step);
+            appState.registrationStep = step;
+            
+            // Mettre à jour l'aperçu dans l'étape 6
+            if (step === 6) {
+                updateReviewSection();
+            }
+        }
+
+        function updateReviewSection() {
+            document.getElementById('review-role').textContent = getRoleDisplayName(appState.registrationData.role);
+            document.getElementById('review-name').textContent = 
+                `${document.getElementById('firstname').value} ${document.getElementById('lastname').value}`;
+            document.getElementById('review-cin').textContent = document.getElementById('cin').value;
+            document.getElementById('review-email').textContent = document.getElementById('email').value;
+            
+            // Afficher les informations médicales seulement pour les patients
+            if (appState.registrationData.role === 'patient') {
+                document.getElementById('review-medical').classList.remove('hidden');
+                document.getElementById('review-blood').textContent = document.getElementById('blood-type').value;
+            } else {
+                document.getElementById('review-medical').classList.add('hidden');
+            }
+        }
+
+        function validateStep(step) {
+            switch(step) {
+                case 1:
+                    return appState.registrationData.role !== undefined;
+                case 2:
+                    return document.getElementById('firstname').value && 
+                           document.getElementById('lastname').value && 
+                           document.getElementById('cin').value && 
+                           document.getElementById('canNumberRegister').value &&
+                           document.getElementById('birthdate').value;
+                case 3:
+                    return document.getElementById('email').value && 
+                           document.getElementById('phone').value && 
+                           document.getElementById('passwordRegister').value && 
+                           document.getElementById('confirm-password').value &&
+                           document.getElementById('passwordRegister').value === document.getElementById('confirm-password').value;
+                case 4:
+                    if (appState.registrationData.role === 'patient') {
+                        return document.getElementById('blood-type').value;
+                    }
+                    return true; // Pour les autres rôles, cette étape est optionnelle
+                case 5:
+                    return true;
+                case 6:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // Fonctions pour les fonctionnalités de scan
+        function simulateQRScan() {
+            alert('Fonction de scan simulée: Données du patient chargées avec succès!');
+        }
+        
+        function closeModal() {
+            const modal = document.querySelector('.fixed.inset-0');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function downloadQRCode() {
+            alert('Fonction de téléchargement simulée: QR Code sauvegardé dans votre galerie!');
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            const messagesContainer = document.getElementById('chat-messages');
+            
+            const userMessage = document.createElement('div');
+            userMessage.className = 'user-message chat-bubble';
+            userMessage.innerHTML = `<p>${message}</p>`;
+            messagesContainer.appendChild(userMessage);
+            
+            input.value = '';
+            
+            setTimeout(() => {
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'typing-indicator';
+                typingIndicator.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+                messagesContainer.appendChild(typingIndicator);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                setTimeout(() => {
+                    messagesContainer.removeChild(typingIndicator);
+                    
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'bot-message chat-bubble';
+                    
+                    let response = "Je suis désolé, je n'ai pas compris votre demande.";
+                    
+                    if (message.toLowerCase().includes('ordonnance') || message.toLowerCase().includes('prescription')) {
+                        response = "Je peux vous aider avec les ordonnances. Voulez-vous vérifier le statut d'une ordonnance ou en créer une nouvelle?";
+                    } else if (message.toLowerCase().includes('rendez-vous') || message.toLowerCase().includes('consultation')) {
+                        response = "Pour les rendez-vous, vous pouvez consulter votre calendrier ou prendre un nouveau rendez-vous avec un médecin.";
+                    } else if (message.toLowerCase().includes('urgence') || message.toLowerCase().includes('secours')) {
+                        response = "En cas d'urgence, composez le 15 (SAMU) ou le 18 (pompiers). Voulez-vous que je vous aide à localiser les services d'urgence les plus proches?";
+                    } else if (message.toLowerCase().includes('médicament') || message.toLowerCase().includes('pharmacie')) {
+                        response = "Je peux vous aider avec des informations sur les médicaments. De quel médicament souhaitez-vous parler?";
+                    } else if (message.toLowerCase().includes('bonjour') || message.toLowerCase().includes('salut')) {
+                        response = "Bonjour ! Comment puis-je vous aider aujourd'hui?";
+                    }
+                    
+                    botMessage.innerHTML = `<p>${response}</p>`;
+                    messagesContainer.appendChild(botMessage);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 1500);
+            }, 500);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Fonctions pour générer le contenu des pages
+        function getPatientDashboard() {
+            const patientData = appState.currentUser.demoData || staticDemoData.patients[0];
+            const heightInMeters = patientData.height / 100;
+            const imc = (patientData.weight / (heightInMeters * heightInMeters)).toFixed(1);
+            
+            let imcClass = 'text-green-500';
+            let imcStatus = 'Normal';
+            if (imc < 18.5) { imcClass = 'text-yellow-500'; imcStatus = 'Minceur'; }
+            else if (imc >= 25) { imcClass = 'text-red-500'; imcStatus = 'Surpoids'; }
+
+            return `
+                <div class="animate-slide-up">
+                    <h1 class="text-3xl font-extrabold mb-8">Bonjour, ${appState.currentUser.name.split(' ')[0]} !</h1>
+
+                    <!-- Bannière de bienvenue personnalisée -->
+                    <div class="bg-gradient-to-r from-patient to-purple-600 rounded-2xl p-6 text-white mb-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-2">Bienvenue sur PassSanté</h2>
+                                <p class="opacity-90">Votre santé, simplifiée et sécurisée</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm opacity-80">CIN: ${appState.currentUser.cin}</p>
+                                <p class="text-xs opacity-70">Membre depuis ${new Date().toLocaleDateString('fr-FR')}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="ai-premium-card" data-expanded="false" class="cyber-card p-5 shadow-xl rounded-2xl mb-8 
+                         transition-all duration-500 ease-in-out 
+                         bg-gradient-to-r from-dark-purple to-patient shadow-patient/50">
+                        
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-white mb-1 flex items-center">
+                                    <i class="fas fa-robot text-white mr-3"></i>
+                                    Assistant PassBot Premium 🧠
+                                </h2>
+                                <p class="text-sm text-light-purple">Analyse proactive, diagnostic LLM et prévention personnalisée.</p>
+                                <p class="text-3xl font-extrabold text-white mt-3">20 $/mois</p>
+                            </div>
+                            
+                            <button id="ai-toggle-btn" class="bg-white text-dark-purple py-2 px-4 rounded-xl font-bold text-sm shadow-md hover:bg-light-purple transition-colors flex items-center hover:scale-105 transform">
+                                <i class="fas fa-arrow-down mr-2 transition-transform duration-500"></i>
+                                En savoir plus
+                            </button>
+                        </div>
+
+                        <div id="ai-premium-details" class="overflow-hidden max-h-0 transition-max-height duration-500 ease-in-out mt-4 border-t border-light-purple/30 pt-4">
+                            <h3 class="text-xl font-semibold text-white mb-3">Fonctionnalités Incluses :</h3>
+                            <ul class="text-light-purple text-base space-y-2">
+                                <li class="flex items-start"><i class="fas fa-check-circle text-green-400 mt-1 mr-3"></i> Analyse Intelligente des Suivis (IA/LLM) : Recommandations et détection précoce des risques.</li>
+                                <li class="flex items-start"><i class="fas fa-check-circle text-green-400 mt-1 mr-3"></i> Alertes Proactives en Temps Réel (via Wearables/IoT) : Notifications des signes vitaux critiques.</li>
+                            </ul>
+                            
+                            <button id="ai-buy-btn" class="w-full mt-6 bg-white text-dark-purple py-3 rounded-xl font-bold text-lg shadow-2xl hover:bg-light-purple transition-colors flex items-center justify-center">
+                                <i class="fas fa-shopping-cart mr-3"></i>
+                                Acheter l'Accès Premium (20 $/mois)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Rythme cardiaque</h3>
+                                <i class="fas fa-heartbeat text-patient text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">${patientData.heartRate} <span class="text-sm font-normal text-gray-500">bpm</span></p>
+                            <p class="text-xs text-green-500">Normal</p>
+                        </div>
+                        
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Pression art.</h3>
+                                <i class="fas fa-tachometer-alt text-doctor text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">${patientData.bloodPressure}</p>
+                            <p class="text-xs text-green-500">Stable</p>
+                        </div>
+
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Allergies</h3>
+                                <i class="fas fa-allergies text-red-500 text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">${patientData.allergies.length} <span class="text-sm font-normal text-gray-500">connues</span></p>
+                            <p class="text-xs text-red-500">${patientData.allergies[0] || 'Aucune'}</p>
+                        </div>
+
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">IMC</h3>
+                                <i class="fas fa-weight text-pharmacist text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">${imc}</p>
+                            <p class="text-xs ${imcClass}">${imcStatus}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-patient">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">Prochain Rendez-vous</h3>
+                                <i class="fas fa-calendar-alt text-patient text-xl"></i>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="bg-patient/10 w-12 h-12 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-user-md text-patient"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Dr. Martin</p>
+                                    <p class="text-sm text-gray-600">25 Oct 2025 - 10:30 (Rappel dans 2 jours)</p>
+                                </div>
+                            </div>
+                            <button class="w-full mt-4 bg-patient/10 text-patient py-2 rounded-xl text-sm font-medium hover:bg-patient/20 transition-colors">
+                                Voir les détails du RDV
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-pharmacist">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">Médicaments en cours</h3>
+                                <i class="fas fa-pills text-pharmacist text-xl"></i>
+                            </div>
+                            <div class="space-y-3">
+                                ${patientData.medications.slice(0, 2).map(med => `
+                                    <div class="flex justify-between items-center border-b pb-2 last:border-b-0">
+                                        <div>
+                                            <p class="font-medium">${med.split(' ')[0]}</p>
+                                            <p class="text-xs text-gray-600">${med.split(' ').slice(1).join(' ')}</p>
+                                        </div>
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Actif</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button class="w-full mt-4 bg-pharmacist/10 text-pharmacist py-2 rounded-xl text-sm font-medium hover:bg-pharmacist/20 transition-colors">
+                                Gérer les ordonnances
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Mettre à jour l'interface en fonction du rôle
+        function updateUIForRole() {
+            const userName = document.getElementById('user-name');
+            const userRole = document.getElementById('user-role');
+            const userAvatar = document.getElementById('user-avatar');
+            
+            userName.textContent = appState.currentUser.name;
+            userRole.textContent = getRoleDisplayName(appState.currentRole);
+            
+            userAvatar.className = `w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3 bg-${appState.currentRole}`;
+            userAvatar.innerHTML = `<i class="fas ${getRoleIcon(appState.currentRole)}"></i>`;
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.classList.contains('active')) {
+                    btn.classList.add(`text-${appState.currentRole}`);
+                }
+            });
+        }
+        
+        // Charger le contenu du tableau de bord
+        function loadDashboardContent() {
+            const content = document.getElementById('dashboard-content');
+            const role = appState.currentRole;
+            
+            let html = '';
+            
+            switch(role) {
+                case 'patient':
+                    html = getPatientDashboard();
+                    break;
+                case 'doctor':
+                    html = getDoctorDashboard();
+                    break;
+                case 'paramedic':
+                    html = getParamedicDashboard();
+                    break;
+                case 'pharmacist':
+                    html = getPharmacistDashboard();
+                    break;
+                default:
+                    html = getPatientDashboard();
+            }
+            
+            content.innerHTML = html;
+            animateElements();
+        }
+        
+        // Charger le contenu d'une page spécifique
+        function loadPageContent(page) {
+            const content = document.getElementById('dashboard-content');
+            const role = appState.currentRole;
+            
+            let html = '';
+            
+            switch(page) {
+                case 'dashboard':
+                    loadDashboardContent();
+                    return;
+                case 'medical-history':
+                    html = getMedicalHistoryPage(role);
+                    break;
+                case 'qr-code':
+                    html = getQRCodePage(role);
+                    break;
+                case 'prescriptions':
+                    html = getPrescriptionsPage(role);
+                    break;
+                case 'profile':
+                    html = getProfilePage(role);
+                    break;
+            }
+            
+            content.innerHTML = html;
+            animateElements();
+        }
+
+        // Fonctions pour les autres rôles
+        function getDoctorDashboard() {
+            const doctorData = appState.currentUser;
+            const roleColor = getRoleColor('doctor');
+            
+            return `
+                <div class="animate-slide-up">
+                    <h1 class="text-3xl font-extrabold mb-8">Tableau de bord Médecin</h1>
+                    
+                    <!-- Bannière de bienvenue personnalisée -->
+                    <div class="bg-gradient-to-r from-doctor to-blue-600 rounded-2xl p-6 text-white mb-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-2">Bienvenue Dr. ${doctorData.name.split(' ')[1]}</h2>
+                                <p class="opacity-90">${doctorData.speciality || 'Médecine Générale'} - ${doctorData.establishment || 'Établissement médical'}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm opacity-80">CIN: ${doctorData.cin}</p>
+                                <p class="text-xs opacity-70">Membre depuis ${new Date().toLocaleDateString('fr-FR')}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Patients</h3>
+                                <i class="fas fa-user-injured text-doctor text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">${doctorData.patients ? doctorData.patients.length : staticDemoData.patients.length}</p>
+                            <p class="text-xs text-green-500">En suivi</p>
+                        </div>
+                        
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Rendez-vous</h3>
+                                <i class="fas fa-calendar-check text-doctor text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">${staticDemoData.appointments.filter(a => a.doctor.includes(doctorData.name.split(' ')[1])).length}</p>
+                            <p class="text-xs text-blue-500">Ce mois</p>
+                        </div>
+                        
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Ordonnances</h3>
+                                <i class="fas fa-file-prescription text-doctor text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">${staticDemoData.prescriptions.filter(p => p.doctor.includes(doctorData.name.split(' ')[1])).length}</p>
+                            <p class="text-xs text-purple-500">Actives</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-doctor">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">Prochains Rendez-vous</h3>
+                                <i class="fas fa-calendar-alt text-doctor text-xl"></i>
+                            </div>
+                            <div class="space-y-3">
+                                ${staticDemoData.appointments
+                                    .filter(a => a.doctor.includes(doctorData.name.split(' ')[1]))
+                                    .slice(0, 3)
+                                    .map(appointment => `
+                                    <div class="flex justify-between items-center border-b pb-2 last:border-b-0">
+                                        <div>
+                                            <p class="font-medium">${appointment.patient}</p>
+                                            <p class="text-xs text-gray-600">${appointment.date} à ${appointment.time}</p>
+                                        </div>
+                                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${appointment.status}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button class="w-full mt-4 bg-doctor/10 text-doctor py-2 rounded-xl text-sm font-medium hover:bg-doctor/20 transition-colors">
+                                Voir l'agenda complet
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-patient">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">Patients récents</h3>
+                                <i class="fas fa-user-injured text-patient text-xl"></i>
+                            </div>
+                            <div class="space-y-3">
+                                ${staticDemoData.patients.slice(0, 3).map(patient => `
+                                    <div class="flex justify-between items-center border-b pb-2 last:border-b-0">
+                                        <div>
+                                            <p class="font-medium">${patient.name}</p>
+                                            <p class="text-xs text-gray-600">${patient.condition}</p>
+                                        </div>
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Suivi</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button class="w-full mt-4 bg-patient/10 text-patient py-2 rounded-xl text-sm font-medium hover:bg-patient/20 transition-colors">
+                                Voir tous les patients
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getParamedicDashboard() {
+            const paramedicData = appState.currentUser;
+            const roleColor = getRoleColor('paramedic');
+            
+            return `
+                <div class="animate-slide-up">
+                    <h1 class="text-3xl font-extrabold mb-8">Tableau de bord Secouriste</h1>
+                    
+                    <!-- Bannière de bienvenue personnalisée -->
+                    <div class="bg-gradient-to-r from-paramedic to-red-600 rounded-2xl p-6 text-white mb-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-2">Bienvenue ${paramedicData.name}</h2>
+                                <p class="opacity-90">${paramedicData.service || 'Service de secours'} - Interventions d'urgence</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm opacity-80">CIN: ${paramedicData.cin}</p>
+                                <p class="text-xs opacity-70">Membre depuis ${new Date().toLocaleDateString('fr-FR')}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Interventions</h3>
+                                <i class="fas fa-ambulance text-paramedic text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">${paramedicData.interventions || 47}</p>
+                            <p class="text-xs text-green-500">Cette année</p>
+                        </div>
+                        
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Urgences</h3>
+                                <i class="fas fa-exclamation-triangle text-paramedic text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">3</p>
+                            <p class="text-xs text-red-500">En cours</p>
+                        </div>
+                        
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Disponibilité</h3>
+                                <i class="fas fa-check-circle text-paramedic text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">100%</p>
+                            <p class="text-xs text-blue-500">Opérationnel</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-paramedic">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">Alertes en cours</h3>
+                                <i class="fas fa-bell text-paramedic text-xl"></i>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center border-b pb-2">
+                                    <div>
+                                        <p class="font-medium">Accident routier</p>
+                                        <p class="text-xs text-gray-600">Boulevard Saint-Germain, Paris 5e</p>
+                                    </div>
+                                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Urgent</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b pb-2">
+                                    <div>
+                                        <p class="font-medium">Malaise cardiaque</p>
+                                        <p class="text-xs text-gray-600">Rue de Rivoli, Paris 1er</p>
+                                    </div>
+                                    <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">Prioritaire</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium">Chute avec traumatisme</p>
+                                        <p class="text-xs text-gray-600">Place de la République, Paris 11e</p>
+                                    </div>
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">En attente</span>
+                                </div>
+                            </div>
+                            <button class="w-full mt-4 bg-paramedic/10 text-paramedic py-2 rounded-xl text-sm font-medium hover:bg-paramedic/20 transition-colors">
+                                Voir toutes les alertes
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-doctor">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">Outils d'urgence</h3>
+                                <i class="fas fa-tools text-doctor text-xl"></i>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button class="bg-red-50 text-red-700 py-3 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors flex flex-col items-center">
+                                    <i class="fas fa-heartbeat text-xl mb-1"></i>
+                                    <span>RCP</span>
+                                </button>
+                                <button class="bg-blue-50 text-blue-700 py-3 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors flex flex-col items-center">
+                                    <i class="fas fa-qrcode text-xl mb-1"></i>
+                                    <span>Scan QR</span>
+                                </button>
+                                <button class="bg-green-50 text-green-700 py-3 rounded-xl text-sm font-medium hover:bg-green-100 transition-colors flex flex-col items-center">
+                                    <i class="fas fa-file-medical text-xl mb-1"></i>
+                                    <span>Fiche patient</span>
+                                </button>
+                                <button class="bg-purple-50 text-purple-700 py-3 rounded-xl text-sm font-medium hover:bg-purple-100 transition-colors flex flex-col items-center">
+                                    <i class="fas fa-map-marker-alt text-xl mb-1"></i>
+                                    <span>Géolocalisation</span>
+                                </button>
+                            </div>
+                            <button class="w-full mt-4 bg-doctor/10 text-doctor py-2 rounded-xl text-sm font-medium hover:bg-doctor/20 transition-colors">
+                                Accéder aux protocoles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getPharmacistDashboard() {
+            const pharmacistData = appState.currentUser;
+            const roleColor = getRoleColor('pharmacist');
+            
+            return `
+                <div class="animate-slide-up">
+                    <h1 class="text-3xl font-extrabold mb-8">Tableau de bord Pharmacien</h1>
+                    
+                    <!-- Bannière de bienvenue personnalisée -->
+                    <div class="bg-gradient-to-r from-pharmacist to-green-600 rounded-2xl p-6 text-white mb-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-2">Bienvenue ${pharmacistData.name}</h2>
+                                <p class="opacity-90">${pharmacistData.pharmacy || 'Pharmacie'} - Gestion des ordonnances</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm opacity-80">CIN: ${pharmacistData.cin}</p>
+                                <p class="text-xs opacity-70">Membre depuis ${new Date().toLocaleDateString('fr-FR')}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Ordonnances</h3>
+                                <i class="fas fa-file-prescription text-pharmacist text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">${pharmacistData.prescriptions || 128}</p>
+                            <p class="text-xs text-green-500">Traitées ce mois</p>
+                        </div>
+                        
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Stocks</h3>
+                                <i class="fas fa-pills text-pharmacist text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">87%</p>
+                            <p class="text-xs text-blue-500">Niveau moyen</p>
+                        </div>
+                        
+                        <div class="bg-white/80 cyber-card p-4 shadow-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-semibold text-gray-700">Alertes</h3>
+                                <i class="fas fa-exclamation-circle text-pharmacist text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold">5</p>
+                            <p class="text-xs text-red-500">À traiter</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-pharmacist">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">Ordonnances en attente</h3>
+                                <i class="fas fa-file-prescription text-pharmacist text-xl"></i>
+                            </div>
+                            <div class="space-y-3">
+                                ${staticDemoData.prescriptions.slice(0, 3).map(prescription => `
+                                    <div class="flex justify-between items-center border-b pb-2 last:border-b-0">
+                                        <div>
+                                            <p class="font-medium">${prescription.patient}</p>
+                                            <p class="text-xs text-gray-600">${prescription.medication} ${prescription.dosage}</p>
+                                        </div>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">En attente</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button class="w-full mt-4 bg-pharmacist/10 text-pharmacist py-2 rounded-xl text-sm font-medium hover:bg-pharmacist/20 transition-colors">
+                                Voir toutes les ordonnances
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-patient">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">Alertes de stock</h3>
+                                <i class="fas fa-exclamation-triangle text-patient text-xl"></i>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center border-b pb-2">
+                                    <div>
+                                        <p class="font-medium">Paracétamol 500mg</p>
+                                        <p class="text-xs text-gray-600">Stock critique: 12 unités</p>
+                                    </div>
+                                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Urgent</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b pb-2">
+                                    <div>
+                                        <p class="font-medium">Amoxicilline 1g</p>
+                                        <p class="text-xs text-gray-600">Stock faible: 25 unités</p>
+                                    </div>
+                                    <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">Attention</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium">Ibuprofène 400mg</p>
+                                        <p class="text-xs text-gray-600">Stock moyen: 45 unités</p>
+                                    </div>
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Surveillance</span>
+                                </div>
+                            </div>
+                            <button class="w-full mt-4 bg-patient/10 text-patient py-2 rounded-xl text-sm font-medium hover:bg-patient/20 transition-colors">
+                                Gérer les stocks
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getMedicalHistoryPage(role) {
+            const userData = appState.currentUser;
+            
+            return `
+                <div class="animate-slide-up">
+                    <h1 class="text-2xl font-bold mb-6">Historique Médical</h1>
+                    
+                    <div class="bg-white rounded-2xl p-5 shadow-md mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-lg">Consultations récentes</h2>
+                            <i class="fas fa-history text-${getRoleColor(role)} text-xl"></i>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            ${staticDemoData.medicalHistory
+                                .filter(record => role === 'patient' ? record.patient === userData.name : true)
+                                .slice(0, 5)
+                                .map(record => `
+                                <div class="border-l-4 border-${getRoleColor(role)} pl-4 py-2">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium">${record.type}</p>
+                                            <p class="text-sm text-gray-600">${record.doctor} - ${record.date}</p>
+                                        </div>
+                                        <span class="bg-${getRoleColor(role)}/10 text-${getRoleColor(role)} text-xs px-2 py-1 rounded-full">Terminé</span>
+                                    </div>
+                                    <p class="text-sm mt-2"><strong>Diagnostic:</strong> ${record.diagnosis}</p>
+                                    <p class="text-sm mt-1"><strong>Notes:</strong> ${record.notes}</p>
+                                    ${record.tests ? `
+                                    <div class="mt-2">
+                                        <p class="text-sm font-medium">Tests réalisés:</p>
+                                        <ul class="text-sm text-gray-600 list-disc list-inside">
+                                            ${record.tests.map(test => `<li>${test}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <button class="w-full mt-4 bg-${getRoleColor(role)}/10 text-${getRoleColor(role)} py-2 rounded-xl text-sm font-medium hover:bg-${getRoleColor(role)}/20 transition-colors">
+                            Voir tout l'historique
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-5 shadow-md">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-lg">Analyses et résultats</h2>
+                            <i class="fas fa-file-medical text-${getRoleColor(role)} text-xl"></i>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div>
+                                    <p class="font-medium">Bilan sanguin complet</p>
+                                    <p class="text-xs text-gray-600">15 Nov 2023 - Dr. Martin</p>
+                                </div>
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Normal</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div>
+                                    <p class="font-medium">Électrocardiogramme</p>
+                                    <p class="text-xs text-gray-600">10 Oct 2023 - Dr. Lefebvre</p>
+                                </div>
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Normal</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">Radiographie thoracique</p>
+                                    <p class="text-xs text-gray-600">05 Sep 2023 - Dr. Martin</p>
+                                </div>
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Normal</span>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-4 bg-${getRoleColor(role)}/10 text-${getRoleColor(role)} py-2 rounded-xl text-sm font-medium hover:bg-${getRoleColor(role)}/20 transition-colors">
+                            Télécharger tous les résultats
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getQRCodePage(role) {
+            const userData = appState.currentUser;
+            
+            return `
+                <div class="animate-slide-up">
+                    <h1 class="text-2xl font-bold mb-6">QR Code Personnel</h1>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-md text-center mb-6">
+                        <div class="mb-4">
+                            <h2 class="font-bold text-lg mb-2">Votre code d'accès médical</h2>
+                            <p class="text-gray-600">Ce QR code contient vos informations médicales essentielles pour les professionnels de santé</p>
+                        </div>
+                        
+                        <div class="bg-gray-100 p-4 rounded-xl inline-block mb-4">
+                            <div class="bg-white p-4 rounded-lg">
+                                <!-- Placeholder for QR Code -->
+                                <div class="w-48 h-48 bg-gray-200 flex items-center justify-center rounded-lg">
+                                    <i class="fas fa-qrcode text-4xl text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center space-x-4">
+                            <button class="bg-${getRoleColor(role)} text-white py-2 px-4 rounded-xl font-medium hover:bg-opacity-90 transition-colors">
+                                <i class="fas fa-download mr-2"></i>Télécharger
+                            </button>
+                            <button class="bg-gray-200 text-gray-700 py-2 px-4 rounded-xl font-medium hover:bg-gray-300 transition-colors">
+                                <i class="fas fa-share-alt mr-2"></i>Partager
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-5 shadow-md">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-lg">Informations accessibles</h2>
+                            <i class="fas fa-info-circle text-${getRoleColor(role)} text-xl"></i>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-3"></i>
+                                <span>Identité et coordonnées</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-3"></i>
+                                <span>Groupe sanguin et allergies</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-3"></i>
+                                <span>Antécédents médicaux importants</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-3"></i>
+                                <span>Traitements en cours</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-3"></i>
+                                <span>Contacts d'urgence</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="flex items-start">
+                                <i class="fas fa-shield-alt text-blue-500 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="text-sm text-blue-800 font-medium">Données sécurisées</p>
+                                    <p class="text-xs text-blue-600">Vos informations sont cryptées et accessibles uniquement aux professionnels autorisés</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getPrescriptionsPage(role) {
+            const userData = appState.currentUser;
+            
+            return `
+                <div class="animate-slide-up">
+                    <h1 class="text-2xl font-bold mb-6">Ordonnances</h1>
+                    
+                    <div class="bg-white rounded-2xl p-5 shadow-md mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-lg">Ordonnances actives</h2>
+                            <i class="fas fa-file-prescription text-${getRoleColor(role)} text-xl"></i>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            ${staticDemoData.prescriptions
+                                .filter(prescription => role === 'patient' ? prescription.patient === userData.name : true)
+                                .slice(0, 5)
+                                .map(prescription => `
+                                <div class="border-l-4 border-${getRoleColor(role)} pl-4 py-3">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium">${prescription.medication} ${prescription.dosage}</p>
+                                            <p class="text-sm text-gray-600">${prescription.patient} - ${prescription.doctor}</p>
+                                        </div>
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
+                                    </div>
+                                    <p class="text-sm mt-2"><strong>Posologie:</strong> ${prescription.instructions}</p>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <p class="text-sm text-gray-600">Délivrée le ${prescription.date}</p>
+                                        <p class="text-sm text-gray-600">Renouvellements: ${prescription.refills}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <button class="w-full mt-4 bg-${getRoleColor(role)}/10 text-${getRoleColor(role)} py-2 rounded-xl text-sm font-medium hover:bg-${getRoleColor(role)}/20 transition-colors">
+                            Voir toutes les ordonnances
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-5 shadow-md">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-lg">Historique des ordonnances</h2>
+                            <i class="fas fa-history text-${getRoleColor(role)} text-xl"></i>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div>
+                                    <p class="font-medium">Amoxicilline 1g</p>
+                                    <p class="text-xs text-gray-600">Dr. Martin - 15 Sep 2023</p>
+                                </div>
+                                <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Terminée</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div>
+                                    <p class="font-medium">Ibuprofène 400mg</p>
+                                    <p class="text-xs text-gray-600">Dr. Lefebvre - 02 Aug 2023</p>
+                                </div>
+                                <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Terminée</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">Paracétamol 500mg</p>
+                                    <p class="text-xs text-gray-600">Dr. Martin - 20 Jul 2023</p>
+                                </div>
+                                <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Terminée</span>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-4 bg-${getRoleColor(role)}/10 text-${getRoleColor(role)} py-2 rounded-xl text-sm font-medium hover:bg-${getRoleColor(role)}/20 transition-colors">
+                            Voir l'historique complet
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getProfilePage(role) {
+            const userData = appState.currentUser;
+            
+            return `
+                <div class="animate-slide-up">
+                    <h1 class="text-2xl font-bold mb-6">Profil Utilisateur</h1>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-md mb-6">
+                        <div class="flex items-center mb-6">
+                            <div class="w-20 h-20 rounded-full bg-${getRoleColor(role)} flex items-center justify-center text-white text-2xl mr-4">
+                                <i class="fas ${getRoleIcon(role)}"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold">${userData.name}</h2>
+                                <p class="text-gray-600">${getRoleDisplayName(role)}</p>
+                                <p class="text-sm text-gray-500">CIN: ${userData.cin}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h3 class="font-medium text-gray-700 mb-2">Informations personnelles</h3>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Date de naissance:</span>
+                                        <span class="font-medium">${userData.birthdate || '01/01/1980'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Groupe sanguin:</span>
+                                        <span class="font-medium">${userData.bloodType || 'Non renseigné'}</span>
+                                    </div>
+                                    ${role === 'patient' ? `
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Allergies:</span>
+                                        <span class="font-medium">${userData.allergies.join(', ') || 'Aucune'}</span>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-medium text-gray-700 mb-2">Informations professionnelles</h3>
+                                <div class="space-y-2">
+                                    ${role === 'doctor' ? `
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Spécialité:</span>
+                                        <span class="font-medium">${userData.speciality || 'Médecine Générale'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Établissement:</span>
+                                        <span class="font-medium">${userData.establishment || 'Non renseigné'}</span>
+                                    </div>
+                                    ` : ''}
+                                    ${role === 'paramedic' ? `
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Service:</span>
+                                        <span class="font-medium">${userData.service || 'SAMU'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Interventions:</span>
+                                        <span class="font-medium">${userData.interventions || 0}</span>
+                                    </div>
+                                    ` : ''}
+                                    ${role === 'pharmacist' ? `
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Pharmacie:</span>
+                                        <span class="font-medium">${userData.pharmacy || 'Non renseignée'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Ordonnances:</span>
+                                        <span class="font-medium">${userData.prescriptions || 0}</span>
+                                    </div>
+                                    ` : ''}
+                                    ${role === 'patient' ? `
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Médecin traitant:</span>
+                                        <span class="font-medium">Dr. Martin</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Dernière consultation:</span>
+                                        <span class="font-medium">15/10/2023</span>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex space-x-4">
+                            <button class="flex-1 bg-${getRoleColor(role)}/10 text-${getRoleColor(role)} py-2 rounded-xl font-medium hover:bg-${getRoleColor(role)}/20 transition-colors">
+                                <i class="fas fa-edit mr-2"></i>Modifier
+                            </button>
+                            <button class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-medium hover:bg-gray-300 transition-colors">
+                                <i class="fas fa-download mr-2"></i>Exporter
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-5 shadow-md">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-lg">Paramètres de sécurité</h2>
+                            <i class="fas fa-shield-alt text-${getRoleColor(role)} text-xl"></i>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">Authentification à deux facteurs</p>
+                                    <p class="text-sm text-gray-600">Sécurisez votre compte avec une vérification supplémentaire</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-${getRoleColor(role)}"></div>
+                                </label>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">Notifications par email</p>
+                                    <p class="text-sm text-gray-600">Recevez des alertes par email</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-${getRoleColor(role)}"></div>
+                                </label>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">Notifications push</p>
+                                    <p class="text-sm text-gray-600">Recevez des alertes sur votre appareil</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-${getRoleColor(role)}"></div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-6 bg-${getRoleColor(role)} text-white py-3 rounded-xl font-medium hover:bg-opacity-90 transition-colors">
+                            <i class="fas fa-lock mr-2"></i>Modifier le mot de passe
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialisation de l'application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion de l'authentification
+            document.getElementById('show-register').addEventListener('click', function() {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+            });
+            
+            document.getElementById('back-to-login').addEventListener('click', function() {
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+                showStep(1);
+            });
+            
+            // Gestion de la sélection du rôle
+            document.querySelectorAll('.role-select').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.role-select').forEach(b => {
+                        b.classList.remove('ring-2', 'ring-offset-2');
+                    });
+                    
+                    this.classList.add('ring-2', 'ring-offset-2');
+                    
+                    const role = this.getAttribute('data-role');
+                    appState.registrationData.role = role;
+                    
+                    // Mettre à jour la description des documents selon le rôle
+                    const documentDescription = document.getElementById('document-description');
+                    if (role === 'patient') {
+                        documentDescription.textContent = 'Documents médicaux, ordonnances, résultats d\'analyses...';
+                    } else if (role === 'doctor') {
+                        documentDescription.textContent = 'Diplômes, carte professionnelle, attestations...';
+                    } else if (role === 'paramedic') {
+                        documentDescription.textContent = 'Certifications, diplômes, autorisations...';
+                    } else if (role === 'pharmacist') {
+                        documentDescription.textContent = 'Diplômes, licence pharmaceutique, autorisations...';
+                    }
+                    
+                    // Activer le bouton suivant
+                    document.getElementById('next-to-step2').disabled = false;
+                    document.getElementById('next-to-step2').classList.remove('opacity-50', 'cursor-not-allowed');
+                });
+            });
+            
+            // Navigation entre les étapes d'inscription
+            document.getElementById('next-to-step2').addEventListener('click', function() {
+                if (validateStep(1)) {
+                    showStep(2);
+                } else {
+                    alert('Veuillez sélectionner un rôle');
+                }
+            });
+            
+            document.getElementById('next-to-step3').addEventListener('click', function() {
+                if (validateStep(2)) {
+                    showStep(3);
+                } else {
+                    alert('Veuillez remplir tous les champs obligatoires');
+                }
+            });
+            
+            document.getElementById('next-to-step4').addEventListener('click', function() {
+                if (validateStep(3)) {
+                    // Afficher les informations appropriées selon le rôle
+                    if (appState.registrationData.role === 'patient') {
+                        document.getElementById('medical-info-patient').classList.remove('hidden');
+                        document.getElementById('professional-info').classList.add('hidden');
+                    } else {
+                        document.getElementById('medical-info-patient').classList.add('hidden');
+                        document.getElementById('professional-info').classList.remove('hidden');
+                    }
+                    showStep(4);
+                } else {
+                    alert('Veuillez remplir tous les champs obligatoires et vérifier que les mots de passe correspondent');
+                }
+            });
+            
+            document.getElementById('next-to-step5').addEventListener('click', function() {
+                if (validateStep(4)) {
+                    showStep(5);
+                } else {
+                    alert('Veuillez compléter cette étape');
+                }
+            });
+            
+            document.getElementById('next-to-step6').addEventListener('click', function() {
+                if (validateStep(5)) {
+                    showStep(6);
+                } else {
+                    alert('Veuillez compléter cette étape');
+                }
+            });
+            
+            // Boutons de retour
+            document.getElementById('back-to-step1').addEventListener('click', function() {
+                showStep(1);
+            });
+            
+            document.getElementById('back-to-step2').addEventListener('click', function() {
+                showStep(2);
+            });
+            
+            document.getElementById('back-to-step3').addEventListener('click', function() {
+                showStep(3);
+            });
+            
+            document.getElementById('back-to-step4').addEventListener('click', function() {
+                showStep(4);
+            });
+            
+            document.getElementById('back-to-step5').addEventListener('click', function() {
+                showStep(5);
+            });
+            
+            // Gestion du scan de document
+            document.getElementById('document-scanner').addEventListener('click', function() {
+                document.getElementById('document-upload').click();
+            });
+            
+            document.getElementById('document-upload').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            document.getElementById('preview-image').src = e.target.result;
+                            document.getElementById('document-preview').classList.remove('hidden');
+                            document.getElementById('document-scanner').classList.add('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        alert('Veuillez sélectionner une image');
+                    }
+                }
+            });
+            
+            document.getElementById('rescan-document').addEventListener('click', function() {
+                document.getElementById('document-preview').classList.add('hidden');
+                document.getElementById('document-scanner').classList.remove('hidden');
+                document.getElementById('document-upload').value = '';
+            });
+            
+            // Finalisation de l'inscription
+            document.getElementById('complete-registration').addEventListener('click', function() {
+                const loadingElement = document.getElementById('register-loading');
+                loadingElement.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    // Simuler l'inscription réussie
+                    appState.currentUser = {
+                        name: document.getElementById('firstname').value + ' ' + document.getElementById('lastname').value,
+                        cin: document.getElementById('cin').value,
+                        role: appState.registrationData.role,
+                        demoData: demoUsers[document.getElementById('cin').value] || staticDemoData.patients[0]
+                    };
+                    
+                    appState.currentRole = appState.registrationData.role;
+                    
+                    // Afficher le tableau de bord
+                    document.getElementById('auth-screen').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    
+                    // Mettre à jour l'interface utilisateur
+                    updateUIForRole();
+                    loadDashboardContent();
+                    
+                    loadingElement.classList.add('hidden');
+                    
+                    alert('Inscription réussie ! Bienvenue sur PassSanté.');
+                }, 2000);
+            });
+            
+            // Connexion avec CIN, CAN et mot de passe
+            document.getElementById('login-btn').addEventListener('click', async function() {
+                const nationalId = document.getElementById('nationalId').value.toUpperCase();
+                const canNumber = document.getElementById('canNumber').value;
+                const password = document.getElementById('password').value;
+                
+                if (!nationalId || !canNumber || !password) {
+                    alert('Veuillez remplir tous les champs');
+                    return;
+                }
+                
+                const loginBtn = document.getElementById('login-btn');
+                const loadingElement = document.getElementById('login-loading');
+                
+                // Afficher l'indicateur de chargement
+                loginBtn.disabled = true;
+                loadingElement.classList.remove('hidden');
+                
+                try {
+                    // Simulation de vérification CIN et CAN
+                    const verification = await simulateCINVerification(nationalId, canNumber);
+                    
+                    if (verification.success) {
+                        // Connexion réussie
+                        appState.currentUser = {
+                            name: verification.user.name,
+                            cin: nationalId,
+                            role: verification.user.role,
+                            demoData: verification.user
+                        };
+                        
+                        appState.currentRole = verification.user.role;
+                        
+                        setTimeout(() => {
+                            document.getElementById('auth-screen').classList.add('hidden');
+                            document.getElementById('dashboard').classList.remove('hidden');
+                            updateUIForRole();
+                            loadDashboardContent();
+                            loadingElement.classList.add('hidden');
+                            loginBtn.disabled = false;
+                        }, 1000);
+                    } else {
+                        loadingElement.classList.add('hidden');
+                        loginBtn.disabled = false;
+                        alert('CIN ou CAN non reconnu. Vérifiez les numéros ou créez un compte.');
+                    }
+                } catch (error) {
+                    loadingElement.classList.add('hidden');
+                    loginBtn.disabled = false;
+                    alert('Erreur de connexion. Veuillez réessayer.');
+                }
+            });
+            
+            // Déconnexion
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                appState.currentUser = null;
+                appState.currentRole = null;
+                
+                document.getElementById('dashboard').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
+                
+                // Réinitialiser le formulaire d'inscription
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+                showStep(1);
+                
+                // Réinitialiser les données
+                appState.registrationData = {};
+                document.querySelectorAll('input').forEach(input => input.value = '');
+                document.querySelectorAll('.role-select').forEach(btn => {
+                    btn.classList.remove('ring-2', 'ring-offset-2');
+                });
+            });
+            
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-btn').forEach(b => {
+                        b.classList.remove('active', 'text-patient', 'text-doctor', 'text-paramedic', 'text-pharmacist');
+                    });
+                    
+                    this.classList.add('active');
+                    this.classList.add(`text-${appState.currentRole}`);
+                    
+                    const page = this.getAttribute('data-page');
+                    appState.currentPage = page;
+                    loadPageContent(page);
+                });
+            });
+            
+            // Chat bot
+            document.getElementById('chat-toggle').addEventListener('click', function() {
+                const chatBot = document.getElementById('chat-bot');
+                if (appState.chatOpen) {
+                    chatBot.classList.add('hidden');
+                    appState.chatOpen = false;
+                } else {
+                    chatBot.classList.remove('hidden');
+                    appState.chatOpen = true;
+                }
+            });
+            
+            document.getElementById('close-chat').addEventListener('click', function() {
+                document.getElementById('chat-bot').classList.add('hidden');
+                appState.chatOpen = false;
+            });
+            
+            document.getElementById('send-message').addEventListener('click', sendMessage);
+            document.getElementById('chat-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Gestion de la carte AI Premium
+            document.addEventListener('click', function(e) {
+                const toggleBtn = e.target.closest('#ai-toggle-btn');
+                const buyBtn = e.target.closest('#ai-buy-btn');
+                const card = document.getElementById('ai-premium-card');
+                const details = document.getElementById('ai-premium-details');
+                const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
+
+                if (toggleBtn) {
+                    e.preventDefault();
+                    
+                    const isExpanded = card.getAttribute('data-expanded') === 'true';
+
+                    if (isExpanded) {
+                        card.setAttribute('data-expanded', 'false');
+                        details.style.maxHeight = '0';
+                        toggleBtn.querySelector('span').textContent = 'En savoir plus';
+                        icon.classList.remove('fa-arrow-up');
+                        icon.classList.add('fa-arrow-down');
+                    } else {
+                        card.setAttribute('data-expanded', 'true');
+                        details.style.maxHeight = details.scrollHeight + "px";
+                        toggleBtn.querySelector('span').textContent = 'Moins de détails';
+                        icon.classList.remove('fa-arrow-down');
+                        icon.classList.add('fa-arrow-up');
+                    }
+                }
+                
+                if (buyBtn) {
+                    alert("Paiement sécurisé de 20$/mois en cours. Simulation d'activation des services IA...");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
